@@ -8,9 +8,10 @@ Colaboración con la Facultad de Agronomía de la Universidad de San Carlos de G
 ToDo:
 + ESP32 Nodes 
   - Setup MQTT Client
-  - Publish to MQTT topic
-  - Subscribe to MQTT topic
-  - Deep sleep + MQTT suscription
+    * ```Publish to MQTT topic```
+    * ```Subscribe to MQTT topic```
+  - Deep sleep
+    * Coherence with MQTT subscription
 
 
 + Raspberry PI Gateway
