@@ -3,6 +3,15 @@ Telemetria continua de variables para hidroponía.
 
 Colaboración con la Facultad de Agronomía de la Universidad de San Carlos de Guatemala
 
-===========
+===========================================================
 
-Red inalámbrica de sensores
+ToDo:
++ ESP32 Nodes 
+  - Setup MQTT Client
+  - Publish to MQTT topic
+  - Subscribe to MQTT topic
+  - Deep sleep + MQTT suscription
+
+
++ Raspberry PI Gateway
+  - Setup WiFi AP
