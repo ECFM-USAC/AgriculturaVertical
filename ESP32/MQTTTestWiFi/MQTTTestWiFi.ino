@@ -26,17 +26,38 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  10        /* Time ESP32 will go to sleep (in seconds) */
+
+#define SECONDS 1000 //IRM Milisenconds to Seconds conversion
+
+#define SAMPLING_RATE_REQUEST_RETRY_PERIOD 10*SECONDS //IRM Retry requesting sampling period after X seconds
+
+#define DATA_TOPIC_PUBLISH "SensorNetwork/Nodes"
+#define HELP_TOPIC_PUBLISH DATA_TOPIC_PUBLISH
+
+#define SAMPLING_TOPIC_SUBSCRIBE "SensorNetwork/SamplingRate"
+
+#define HELP_TOKEN "HELP!" //IRM Request Sampling Rate to the server
+
 // Update these with values suitable for your network.
 
-const char* ssid = "IvanZenfone";
-const char* password = "27092014";
-const char* mqtt_server = "192.168.43.152";
+const char* ssid = "ECFM-Instrumentacion";
+const char* password = "ChicolazoPositivo";
+const char* mqtt_server = "192.168.126.113";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
+
+bool samplingReceived = false;
+
+
+//IRM Custom function prototypes
+void requestSamplingPeriod(void);
 
 void setup_wifi() {
 
@@ -67,18 +88,21 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("] ");
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
+    
   }
   Serial.println();
 
   // Switch on the LED if an 1 was received as first character
   if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    digitalWrite(LED_BUILTIN, HIGH);   // Turn the LED on (Note that LOW is the voltage level
     // but actually the LED is on; this is because
     // it is acive low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
 
+    samplingReceived = true; //IRM Go to deep sleep only if required token arrives
+    delay(20);
+  } else {
+    digitalWrite(LED_BUILTIN, LOW);  // Turn the LED off by making the voltage HIGH
+  }
 }
 
 void reconnect() {
@@ -86,15 +110,15 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Create a random client ID
-    String clientId = "ESP8266Client-";
+    String clientId = "ESP32-Node-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("outTopic", "hello world");
+      //client.publish(DATA_TOPIC_PUBLISH, "hello world");
       // ... and resubscribe
-      client.subscribe("inTopic");
+      client.subscribe(SAMPLING_TOPIC_SUBSCRIBE);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -127,6 +151,21 @@ void loop() {
     snprintf (msg, 75, "hw #%ld", value);
     Serial.print("Publish message: ");
     Serial.println(msg);
-    client.publish("outTopic", msg);
+    client.publish(DATA_TOPIC_PUBLISH, msg);
+  }
+
+  Serial.println("Waiting for server response");
+  requestSamplingPeriod();
+  Serial.println("Going to deep-sleep now");
+
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  esp_deep_sleep_start();
+}
+
+void requestSamplingPeriod(void){
+  client.publish(HELP_TOPIC_PUBLISH, HELP_TOKEN);
+  while(!samplingReceived){
+    client.loop();
   }
 }
+
