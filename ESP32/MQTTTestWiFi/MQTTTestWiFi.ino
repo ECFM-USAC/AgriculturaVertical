@@ -25,10 +25,27 @@
 
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "EEPROM.h"
 
+//#define DEBUG 1
+
+#define BUTTON KEY_BUILTIN
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  10        /* Time ESP32 will go to sleep (in seconds) */
+
+#define EEPROM_SIZE 64
+
+#define LED_BLINK_ON 25    //IRM LED On period between blink cycles
+#define LED_BLINK_OFF 400  //IRM LED Off period between blink cycles
+
+#define LONG_PRESS_MS 2000 //IRM Min time to determine whether the button press event was long or short
+#define SHORT_PRESS_MS 20 //IRM Period between button-press checking try events
+#define BUTTON_CHECK_TIMES 3 //IRM How many times the button must remain pressed to trigger a button-pressed event
+#define PRESSED_STATE 0 //IRM Inverted-logic
+
+#define NODE_ID_ADDR 0 //IRM Address where NodeID will be stored/retreived from
+#define MAX_NODES 10
 
 #define SECONDS 1000 //IRM Milisenconds to Seconds conversion
 
@@ -55,9 +72,16 @@ int value = 0;
 
 bool samplingReceived = false;
 
+byte nodeID = 0;
 
 //IRM Custom function prototypes
 void requestSamplingPeriod(void);
+void showNodeID(void);
+void setNodeID(void);
+byte retrieveNodeIDFromEEPROM(void);
+bool buttonPressed(unsigned int tries);
+bool writeNodeIDToEEPROM(byte id);
+void incrementNodeID(void);
 
 void setup_wifi() {
 
@@ -106,9 +130,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconnect() {
+
+  static boolean ledState = false;
   // Loop until we're reconnected
   while (!client.connected()) {
+    ledState = ledState ? false : true;
+    digitalWrite(LED_BUILTIN, ledState);
     Serial.print("Attempting MQTT connection...");
+
     // Create a random client ID
     String clientId = "ESP32-Node-";
     clientId += String(random(0xffff), HEX);
@@ -127,12 +156,36 @@ void reconnect() {
       delay(5000);
     }
   }
+  digitalWrite(LED_BUILTIN, 0);
 }
 
 void setup() {
-  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  pinMode(KEY_BUILTIN, INPUT_PULLUP); //Init dev-board integrated button. Inverted-logic
+  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   Serial.begin(115200);
+
+  digitalWrite(LED_BUILTIN, 1);
+  delay(3000);
+  digitalWrite(LED_BUILTIN, 0);
+
+  if(buttonPressed(BUTTON_CHECK_TIMES)){
+    setNodeID();
+    esp_sleep_enable_timer_wakeup(1 * uS_TO_S_FACTOR);
+    esp_deep_sleep_start();
+  }else{
+
+    delay(1000);
+    
+    nodeID = retrieveNodeIDFromEEPROM();
+    showNodeID();
+  }
+
+  
   setup_wifi();
+
+  Serial.print("Node ID: ");
+  Serial.println(nodeID);
+  
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 }
@@ -168,4 +221,119 @@ void requestSamplingPeriod(void){
     client.loop();
   }
 }
+
+byte retrieveNodeIDFromEEPROM(void){
+  if (!EEPROM.begin(EEPROM_SIZE)){
+    Serial.println("failed to initialise EEPROM"); return false;
+  }
+
+  nodeID = EEPROM.read(NODE_ID_ADDR);
+  return nodeID;
+}
+
+bool writeNodeIDToEEPROM(byte id){
+  if (!EEPROM.begin(EEPROM_SIZE)){
+    Serial.println("failed to initialise EEPROM"); return false;
+  }
+  EEPROM.write(NODE_ID_ADDR, id);
+  EEPROM.commit();
+  return true;
+}
+
+
+void showNodeID(void){
+
+  #ifdef DEBUG
+    Serial.println("Show Node ID");
+  #endif
+
+  for(int i=0; i<nodeID; i++){
+    digitalWrite(LED_BUILTIN, 1);
+    delay(LED_BLINK_ON);
+    digitalWrite(LED_BUILTIN, 0);
+    delay(LED_BLINK_OFF);
+  }
+}
+
+
+void incrementNodeID(void){
+  nodeID = nodeID >= MAX_NODES ? 1 : nodeID + 1;
+  writeNodeIDToEEPROM(nodeID);
+  nodeID = retrieveNodeIDFromEEPROM();
+  delay(100);
+  showNodeID();
+  
+  #ifdef DEBUG
+  Serial.println("Button Pressed!");
+  Serial.print("Node ID: ");
+  Serial.println(nodeID);
+  #endif
+}
+
+
+void setNodeID(void){
+  static boolean setOk = false;
+
+  static long startTime;
+  long deltaTime;
+
+  digitalWrite(LED_BUILTIN, 1);
+
+  delay(1500);
+
+  digitalWrite(LED_BUILTIN, 0);
+
+  #ifdef DEBUG
+    Serial.println("Starting setNodeID");
+  #endif
+
+  while(!setOk){ //IRM Keep looping until ID has been succesfully stored in EEPROM
+
+    if (buttonPressed(BUTTON_CHECK_TIMES)){
+        incrementNodeID();
+    }
+
+  
+    //IRM Long button press
+    if(buttonPressed(BUTTON_CHECK_TIMES)){
+      startTime = millis();
+      deltaTime = 0;
+      while((buttonPressed(BUTTON_CHECK_TIMES))&&(deltaTime < LONG_PRESS_MS)){
+        deltaTime = millis() - startTime;
+        delay(10);
+        
+        #ifdef DEBUG
+          Serial.println("LP");
+        #endif
+        
+      }
+      if(deltaTime >= LONG_PRESS_MS){
+        #ifdef DEBUG
+          Serial.println("Long Press!");
+        #endif
+        setOk = writeNodeIDToEEPROM(nodeID);
+      }else{
+        incrementNodeID();
+      }
+    }
+    
+  }
+  
+}
+
+
+bool buttonPressed(unsigned int tries){
+  for(int i = 0; i < tries; i++){
+    if(digitalRead(KEY_BUILTIN) != PRESSED_STATE)
+      return false;
+    delay(SHORT_PRESS_MS);
+  }
+  return true;
+}
+
+
+
+
+
+
 
