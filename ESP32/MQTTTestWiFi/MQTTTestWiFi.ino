@@ -26,6 +26,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "EEPROM.h"
+#include <ArduinoJson.h>
 
 //#define DEBUG 1
 
@@ -58,11 +59,17 @@
 
 #define HELP_TOKEN "HELP!" //IRM Request Sampling Rate to the server
 
+#define CONNECTED_SENSORS 4
+
 // Update these with values suitable for your network.
 
 const char* ssid = "Agricultura-Vertical";
 const char* password = "eco>LITE";
 const char* mqtt_server = "192.168.0.100";
+
+//IRM Analog pins where sensors may be plugged-in to. Sorted in ascendent order.
+const int8_t ANALOG_PINS[] = {A4, A5, A6, A7, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19};
+unsigned int sensorValues[MAX_NODES]; //IRM Sensor data will be stored here
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -82,6 +89,9 @@ byte retrieveNodeIDFromEEPROM(void);
 bool buttonPressed(unsigned int tries);
 bool writeNodeIDToEEPROM(byte id);
 void incrementNodeID(void);
+void initSensorValues(void);
+void sampleSensorValues(unsigned int *data);
+String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N);
 
 void setup_wifi() {
 
@@ -188,9 +198,13 @@ void setup() {
   
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+
+  initSensorValues();
 }
 
 void loop() {
+
+  String json;
 
   if (!client.connected()) {
     reconnect();
@@ -205,6 +219,17 @@ void loop() {
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish(DATA_TOPIC_PUBLISH, msg);
+
+    //IRM Gather data from sensors
+    sampleSensorValues(sensorValues, CONNECTED_SENSORS);
+
+    //IRM Generate JSON String from data and battery values
+    json = toJSON(nodeID, 500, sensorValues, CONNECTED_SENSORS);
+
+    //IRM Publish json string to broker
+    const char * c = json.c_str();
+    client.publish(DATA_TOPIC_PUBLISH, c);
+    
   }
 
   Serial.println("Waiting for server response");
@@ -331,9 +356,44 @@ bool buttonPressed(unsigned int tries){
   return true;
 }
 
+//IRM Clean Sensor Values Data Vector
+void initSensorValues(void){ 
+  for(int i = 0; i < MAX_NODES; i++){
+    sensorValues[i] = 0;
+  }
+}
+
+//IRM write sensor values into referenced data vector with N values
+void sampleSensorValues(unsigned int *data, uint8_t N){
+  for(int i = 0; i < N; i++){
+    data[i] = analogRead(ANALOG_PINS[i]);
+  }
+}
 
 
+String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N){
 
+  String jsonDataString;
+  
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
 
+  root["Node"] = node;
+  root["Battery"] = battery;
+
+  JsonArray& sensors = root.createNestedArray("Sensors");
+  for(int i = 0; i < N; i++){
+    sensors.add(data[i]);
+  }
+
+  root.printTo(jsonDataString);
+
+  #ifdef DEBUG
+    Serial.println(jsonDataString);
+  #endif
+
+  return jsonDataString;
+  
+}
 
 
