@@ -27,6 +27,7 @@
 #include <PubSubClient.h>
 #include "EEPROM.h"
 #include <ArduinoJson.h>
+#include <stdio.h>
 
 //#define DEBUG 1
 
@@ -65,7 +66,10 @@
 
 const char* ssid = "Agricultura-Vertical";
 const char* password = "eco>LITE";
-const char* mqtt_server = "192.168.0.100";
+//const char* mqtt_server = "192.168.0.100";
+
+
+const char* mqtt_server = "192.168.0.101";
 
 //IRM Analog pins where sensors may be plugged-in to. Sorted in ascendent order.
 const int8_t ANALOG_PINS[] = {A4, A5, A6, A7, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19};
@@ -80,6 +84,9 @@ int value = 0;
 bool samplingReceived = false;
 
 byte nodeID = 0;
+
+int timeToSleep = TIME_TO_SLEEP;
+
 
 //IRM Custom function prototypes
 void requestSamplingPeriod(void);
@@ -103,9 +110,14 @@ void setup_wifi() {
 
   WiFi.begin(ssid, password);
 
+  int i = 0;
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay(2000);
     Serial.print(".");
+    if(++i>10){ //IRM Reboot if WiFi connection isn't established in 20 seconds (Software Watchdog)
+      esp_sleep_enable_timer_wakeup(1);
+      esp_deep_sleep_start();
+    }
   }
 
   randomSeed(micros());
@@ -117,26 +129,33 @@ void setup_wifi() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
+  char data[6];
+
+  for(int j = 0; j < sizeof(data); j++){
+    data[j] = 0;
+  }
+  
   Serial.print("Message arrived [");
   Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-    
+  Serial.println("] ");
+  for (int i = 0; i < length; i++) { //IRM Convert to const char *
+    data[i] = (char)payload[i];
   }
-  Serial.println();
+  const char * c = data;
+  
+  //IRM Parse text to integer
+  timeToSleep = atoi(c);
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(LED_BUILTIN, HIGH);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
+  #ifdef DEBUG
+  Serial.print("Time to sleep: ");
+  Serial.print(timeToSleep);
+  Serial.println(" seconds");
+  #endif
 
-    samplingReceived = true; //IRM Go to deep sleep only if required token arrives
-    delay(20);
-  } else {
-    digitalWrite(LED_BUILTIN, LOW);  // Turn the LED off by making the voltage HIGH
-  }
+  digitalWrite(LED_BUILTIN, HIGH);
+  samplingReceived = true; //IRM Go to deep sleep only if required token arrives
+  delay(20);
+
 }
 
 void reconnect() {
@@ -175,8 +194,9 @@ void setup() {
   Serial.begin(115200);
 
   digitalWrite(LED_BUILTIN, 1);
-  delay(3000);
+  delay(30);
   digitalWrite(LED_BUILTIN, 0);
+  delay(2500);
 
   if(buttonPressed(BUTTON_CHECK_TIMES)){
     setNodeID();
@@ -184,7 +204,7 @@ void setup() {
     esp_deep_sleep_start();
   }else{
 
-    delay(1000);
+    //delay(1000);
     
     nodeID = retrieveNodeIDFromEEPROM();
     showNodeID();
@@ -215,11 +235,14 @@ void loop() {
   if (now - lastMsg > 200) {
     lastMsg = now;
     ++value;
+    
+    #ifdef DEBUG
     snprintf (msg, 75, "hw #%ld", value);
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish(DATA_TOPIC_PUBLISH, msg);
-
+    #endif
+    
     //IRM Gather data from sensors
     sampleSensorValues(sensorValues, CONNECTED_SENSORS);
 
@@ -236,7 +259,7 @@ void loop() {
   requestSamplingPeriod();
   Serial.println("Going to deep-sleep now");
 
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  esp_sleep_enable_timer_wakeup(timeToSleep * uS_TO_S_FACTOR);
   esp_deep_sleep_start();
 }
 
