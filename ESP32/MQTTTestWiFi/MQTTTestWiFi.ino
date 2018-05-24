@@ -60,7 +60,7 @@
 
 #define HELP_TOKEN "HELP!" //IRM Request Sampling Rate to the server
 
-#define CONNECTED_SENSORS 4
+#define CONNECTED_SENSORS 6
 
 // Update these with values suitable for your network.
 
