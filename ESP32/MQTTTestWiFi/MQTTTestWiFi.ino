@@ -28,6 +28,7 @@
 #include "EEPROM.h"
 #include <ArduinoJson.h>
 #include <stdio.h>
+#include "driver/adc.h"
 
 //#define DEBUG 1
 
@@ -47,7 +48,7 @@
 #define PRESSED_STATE 0 //IRM Inverted-logic
 
 #define NODE_ID_ADDR 0 //IRM Address where NodeID will be stored/retreived from
-#define MAX_NODES 10
+#define MAX_NODES 5
 
 #define SECONDS 1000 //IRM Milisenconds to Seconds conversion
 
@@ -66,10 +67,10 @@
 
 const char* ssid = "Agricultura-Vertical";
 const char* password = "eco>LITE";
-//const char* mqtt_server = "192.168.0.100";
+const char* mqtt_server = "192.168.0.100";
 
 
-const char* mqtt_server = "192.168.0.101";
+//const char* mqtt_server = "192.168.0.102";
 
 //IRM Analog pins where sensors may be plugged-in to. Sorted in ascendent order.
 const int8_t ANALOG_PINS[] = {A4, A5, A6, A7, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19};
@@ -89,6 +90,7 @@ int timeToSleep = TIME_TO_SLEEP;
 
 
 //IRM Custom function prototypes
+void setupVREF(void);
 void requestSamplingPeriod(void);
 void showNodeID(void);
 void setNodeID(void);
@@ -114,7 +116,7 @@ void setup_wifi() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(2000);
     Serial.print(".");
-    if(++i>10){ //IRM Reboot if WiFi connection isn't established in 20 seconds (Software Watchdog)
+    if(++i>5){ //IRM Reboot if WiFi connection isn't established in 10 seconds (Software Watchdog)
       esp_sleep_enable_timer_wakeup(1);
       esp_deep_sleep_start();
     }
@@ -212,6 +214,7 @@ void setup() {
 
   
   setup_wifi();
+  //usetupVREF(); //IRM Initialize Internal Voltage Reference
 
   Serial.print("Node ID: ");
   Serial.println(nodeID);
@@ -389,7 +392,9 @@ void initSensorValues(void){
 //IRM write sensor values into referenced data vector with N values
 void sampleSensorValues(unsigned int *data, uint8_t N){
   for(int i = 0; i < N; i++){
-    data[i] = analogRead(ANALOG_PINS[i]);
+    //IRM Fixed nonlinearity in ESP32 ADC mearurements
+    //IRM Coefficients obtained through experimentation with a calibrated power supply
+    data[i] = (unsigned int)(analogRead(ANALOG_PINS[i])*1.0337 + 203.42);
   }
 }
 
@@ -401,10 +406,10 @@ String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
-  root["Node"] = node;
-  root["Battery"] = battery;
+  root["nodes"] = node;
+  root["battery"] = battery;
 
-  JsonArray& sensors = root.createNestedArray("Sensors");
+  JsonArray& sensors = root.createNestedArray("measures");
   for(int i = 0; i < N; i++){
     sensors.add(data[i]);
   }
@@ -419,4 +424,19 @@ String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8
   
 }
 
+//IRM Setup Internal 1000 mV VRef for Battery Measurment
+//IRM VRef routed to GPIO25 (A12)
+void setupVREF(void){
+  pinMode(A12, INPUT);
+  esp_err_t status = adc2_vref_to_gpio(GPIO_NUM_25);
+  if(status == ESP_OK){
+    printf("v_ref routed to GPIO25\n");
+  }else{
+    printf("failed to route v_ref\n");
+    Serial.println(status);
+    //IRM Reboot Now
+    esp_sleep_enable_timer_wakeup(1);
+    esp_deep_sleep_start();
+  }
+}
 
