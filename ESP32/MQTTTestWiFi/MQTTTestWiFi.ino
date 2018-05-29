@@ -29,10 +29,17 @@
 #include <ArduinoJson.h>
 #include <stdio.h>
 #include "driver/adc.h"
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+
 
 //#define DEBUG 1
 
 #define BUTTON KEY_BUILTIN
+
+
+#define ENABLE_MEASUREMENT 17 //IRM Sensors' VCC Enable Pin (so no power is wasted while not measuring)
+//IRM All the sensors' "VCC" must be connected to this pin. Max theoretical current with 6 sensors is 1mA
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  10        /* Time ESP32 will go to sleep (in seconds) */
@@ -193,7 +200,12 @@ void reconnect() {
 void setup() {
   pinMode(KEY_BUILTIN, INPUT_PULLUP); //Init dev-board integrated button. Inverted-logic
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  Serial.begin(115200);
+  digitalWrite(LED_BUILTIN, 0);
+  
+  pinMode(ENABLE_MEASUREMENT, OUTPUT); //IRM Disable Sensors' Power Source
+  digitalWrite(ENABLE_MEASUREMENT, 0);
+  
+  Serial.begin(115200); 
 
   digitalWrite(LED_BUILTIN, 1);
   delay(30);
@@ -212,9 +224,12 @@ void setup() {
     showNodeID();
   }
 
+
+  //IRM Disable Brownout Detector
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
   
   setup_wifi();
-  //usetupVREF(); //IRM Initialize Internal Voltage Reference
+  //setupVREF(); //IRM Initialize Internal Voltage Reference
 
   Serial.print("Node ID: ");
   Serial.println(nodeID);
@@ -391,11 +406,19 @@ void initSensorValues(void){
 
 //IRM write sensor values into referenced data vector with N values
 void sampleSensorValues(unsigned int *data, uint8_t N){
+
+  //IRM Enable sensors' power supply
+  digitalWrite(ENABLE_MEASUREMENT, 1);
+
+  
   for(int i = 0; i < N; i++){
     //IRM Fixed nonlinearity in ESP32 ADC mearurements
     //IRM Coefficients obtained through experimentation with a calibrated power supply
     data[i] = (unsigned int)(analogRead(ANALOG_PINS[i])*1.0337 + 203.42);
   }
+
+  //IRM Disable sensors' power supply
+  digitalWrite(ENABLE_MEASUREMENT, 0);
 }
 
 
