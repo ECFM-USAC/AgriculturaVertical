@@ -33,13 +33,29 @@
 #include "soc/rtc_cntl_reg.h"
 
 
-//#define DEBUG 1
+//#define DEBUG 1  //IRM Enable/Disable as required
 
 #define BUTTON KEY_BUILTIN
 
 
-#define ENABLE_MEASUREMENT 17 //IRM Sensors' VCC Enable Pin (so no power is wasted while not measuring)
+#define ENABLE_SENSOR_MEASUREMENT_PIN 17 //IRM Sensors' VCC Enable Pin (so no power is wasted while not measuring)
 //IRM All the sensors' "VCC" must be connected to this pin. Max theoretical current with 6 sensors is 1mA
+
+#define ENABLE_BATTERY_MEASUREMENT_PIN 16
+#define BATTERY_ADC_PIN A11
+
+/*
+ * MAX VOLTAGE : 4.2 V = ADC 2606
+ * ALARM       : 3.7 V = ADC 2296
+ * MIN VOLTAGE : 3.4 V = ADC 2110
+ * 
+ * N = 12 bits 
+ * VREF = 3.3 V
+ */ 
+#define MAX_BAT_VOLTAGE 2606
+#define ALARM_BAT_VOLTAGE 2296
+#define MIN_BAT_VOLTAGE 2172
+
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  10        /* Time ESP32 will go to sleep (in seconds) */
@@ -107,6 +123,7 @@ bool writeNodeIDToEEPROM(byte id);
 void incrementNodeID(void);
 void initSensorValues(void);
 void sampleSensorValues(unsigned int *data);
+unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin);
 String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N);
 
 void setup_wifi() {
@@ -202,8 +219,10 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   digitalWrite(LED_BUILTIN, 0);
   
-  pinMode(ENABLE_MEASUREMENT, OUTPUT); //IRM Disable Sensors' Power Source
-  digitalWrite(ENABLE_MEASUREMENT, 0);
+  pinMode(ENABLE_SENSOR_MEASUREMENT_PIN, OUTPUT); //IRM Disable Sensors' Power Source
+  digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);
+
+  pinMode(ENABLE_BATTERY_MEASUREMENT_PIN, INPUT); //IRM Disable battery measurement sink
   
   Serial.begin(115200); 
 
@@ -265,7 +284,8 @@ void loop() {
     sampleSensorValues(sensorValues, CONNECTED_SENSORS);
 
     //IRM Generate JSON String from data and battery values
-    json = toJSON(nodeID, 500, sensorValues, CONNECTED_SENSORS);
+    unsigned int battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN);
+    json = toJSON(nodeID, battery, sensorValues, CONNECTED_SENSORS);
 
     //IRM Publish json string to broker
     const char * c = json.c_str();
@@ -408,7 +428,7 @@ void initSensorValues(void){
 void sampleSensorValues(unsigned int *data, uint8_t N){
 
   //IRM Enable sensors' power supply
-  digitalWrite(ENABLE_MEASUREMENT, 1);
+  digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 1);
 
   
   for(int i = 0; i < N; i++){
@@ -418,7 +438,25 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
   }
 
   //IRM Disable sensors' power supply
-  digitalWrite(ENABLE_MEASUREMENT, 0);
+  digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);
+}
+
+//IRM return battery measurement within 100% to 0% range in unsigned integer format
+unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin){
+
+  //IRM use a 1/2 voltage divider without exceeding 12 mA
+  pinMode(activationPin, OUTPUT);
+  digitalWrite(activationPin, 0); //IRM Sink battery measurement current
+  unsigned int batt = (unsigned int)(analogRead(adcChannel)*1.0337 + 203.42); //IRM Nonlinearity fixed
+  pinMode(activationPin, INPUT); //IRM Stop sinking battery measurement current to save power
+
+  batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
+
+  map(batt, 0, 4095, 0, 100);
+
+  //IRM battery measurement in 0% to 100% scale (see #defines for more details)
+  return batt; 
+  
 }
 
 
