@@ -452,7 +452,7 @@ unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin){
 
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
 
-  map(batt, 0, 4095, 0, 100);
+  map(batt, 2296, 2605, 0, 100); //IRM (3.7V -> 4.2V) = (0% -> 100%)
 
   //IRM battery measurement in 0% to 100% scale (see #defines for more details)
   return batt; 
