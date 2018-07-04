@@ -1,0 +1,2234 @@
+[
+    {
+        "id": "8e837334.d37cd",
+        "type": "tab",
+        "label": "SenseHatFlow",
+        "disabled": false,
+        "info": "This flow is used to read the temperature, humidity and preasure sensors in the RPi SenseHat"
+    },
+    {
+        "id": "d15a13e8.c613c",
+        "type": "tab",
+        "label": "NodeOneFlow",
+        "disabled": false,
+        "info": "This flow is used to get data from Node 1."
+    },
+    {
+        "id": "2635cab6.6d9186",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-dark",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#097479",
+                    "value": "#097479",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#097479",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#000000",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#0eb8c0",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#555555",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#eeeeee",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#097479",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            }
+        },
+        "site": {
+            "name": "Agricultura Vertical",
+            "hideToolbar": "false",
+            "allowSwipe": "true",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "e81248ed.dbbe88",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "RPiBroker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "2829a622.5469aa",
+        "type": "ui_tab",
+        "z": "",
+        "name": "SenseHat",
+        "icon": "dashboard"
+    },
+    {
+        "id": "fdafef04.0c536",
+        "type": "ui_group",
+        "z": "",
+        "name": "Temperature",
+        "tab": "2829a622.5469aa",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "148b2565.a6eb2b",
+        "type": "ui_group",
+        "z": "",
+        "name": "Humiditiy",
+        "tab": "2829a622.5469aa",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "4b45ef9a.6b6e2",
+        "type": "ui_group",
+        "z": "",
+        "name": "Pressure",
+        "tab": "2829a622.5469aa",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "8ba75e06.034be",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Nodos",
+        "icon": "dashboard"
+    },
+    {
+        "id": "9f29decb.064fd",
+        "type": "ui_group",
+        "z": "",
+        "name": "Nodo#1",
+        "tab": "8ba75e06.034be",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "9606a88d.171dd8",
+        "type": "ui_group",
+        "z": "",
+        "name": "Nodo#2",
+        "tab": "8ba75e06.034be",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "85f4ea52.2674d8",
+        "type": "ui_group",
+        "z": "",
+        "name": "Nodo#3",
+        "tab": "8ba75e06.034be",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "5f9d59e2.d61998",
+        "type": "ui_group",
+        "z": "",
+        "name": "Nodo#4",
+        "tab": "8ba75e06.034be",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "b35db334.fea44",
+        "type": "ui_group",
+        "z": "",
+        "name": "Nodo#5",
+        "tab": "8ba75e06.034be",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "915e93b3.a2e1d",
+        "type": "ui_group",
+        "z": "",
+        "name": "Date And Hour",
+        "tab": "7cac235e.e979dc",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "efa89f62.0c26c",
+        "type": "ftp-download-server",
+        "z": "",
+        "host": "192.168.1.68",
+        "port": "21",
+        "user": "pi",
+        "connTimeout": "10000",
+        "pasvTimeout": "10000",
+        "keepalive": "10000",
+        "name": "RPiServer"
+    },
+    {
+        "id": "fcd29ce6.5dba2",
+        "type": "ftp",
+        "z": "",
+        "host": "192.168.1.68",
+        "port": "21",
+        "secureOptions": "",
+        "user": "pi",
+        "connTimeout": "",
+        "pasvTimeout": "",
+        "keepalive": ""
+    },
+    {
+        "id": "7e1dee67.aabe5",
+        "type": "websocket-listener",
+        "z": "",
+        "path": "",
+        "wholemsg": "false"
+    },
+    {
+        "id": "c3b29894.471398",
+        "type": "ui_group",
+        "z": "",
+        "name": "Download Operations",
+        "tab": "7cac235e.e979dc",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "7cac235e.e979dc",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Usuario",
+        "icon": "dashboard"
+    },
+    {
+        "id": "262b709c.d84e9",
+        "type": "ui_group",
+        "z": "",
+        "name": "SampleRate",
+        "tab": "7cac235e.e979dc",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "3c9da6ce.d5e9ea",
+        "type": "rpi-sensehat in",
+        "z": "8e837334.d37cd",
+        "name": "RPi's SenseHat",
+        "motion": false,
+        "env": true,
+        "stick": false,
+        "x": 100,
+        "y": 40,
+        "wires": [
+            [
+                "98cd552a.747ff8"
+            ]
+        ]
+    },
+    {
+        "id": "189b4282.01541d",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "Temperature",
+        "func": "var data = msg.payload;\nmsg.payload = data.temperature;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 570,
+        "y": 40,
+        "wires": [
+            [
+                "63dd22d4.64c21c",
+                "51301eac.d07a1"
+            ]
+        ]
+    },
+    {
+        "id": "63dd22d4.64c21c",
+        "type": "ui_chart",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "group": "fdafef04.0c536",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "label": "RPI's Temperature History",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 850,
+        "y": 40,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "51301eac.d07a1",
+        "type": "ui_gauge",
+        "z": "8e837334.d37cd",
+        "name": "RPiTemperature",
+        "group": "fdafef04.0c536",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "RPi's Temperature",
+        "label": "°C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "80",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 820,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "8fd93f5b.d9e1",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "Humidity",
+        "func": "var data = msg.payload;\nmsg.payload = data.humidity;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 560,
+        "y": 120,
+        "wires": [
+            [
+                "369c5309.71cfdc",
+                "8affa3a.7ca526"
+            ]
+        ]
+    },
+    {
+        "id": "369c5309.71cfdc",
+        "type": "ui_chart",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "group": "148b2565.a6eb2b",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "label": "RPI's Humidity History",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 840,
+        "y": 120,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "8affa3a.7ca526",
+        "type": "ui_gauge",
+        "z": "8e837334.d37cd",
+        "name": "RPiHumidity",
+        "group": "148b2565.a6eb2b",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "RPi's Humidity",
+        "label": "(%) Relative Humidity",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 810,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "b9c466af.d724b8",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "Pressure",
+        "func": "var data = msg.payload;\nmsg.payload = data.pressure;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 560,
+        "y": 200,
+        "wires": [
+            [
+                "b0c6fdec.21bee",
+                "46d2189f.b83f08"
+            ]
+        ]
+    },
+    {
+        "id": "b0c6fdec.21bee",
+        "type": "ui_chart",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "group": "4b45ef9a.6b6e2",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "label": "RPI's Pressure History",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 840,
+        "y": 200,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "46d2189f.b83f08",
+        "type": "ui_gauge",
+        "z": "8e837334.d37cd",
+        "name": "RPiPressure",
+        "group": "4b45ef9a.6b6e2",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "RPi's Pressure",
+        "label": "hPa",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "1500",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 810,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "c55b0fb7.69b9d",
+        "type": "mqtt in",
+        "z": "d15a13e8.c613c",
+        "name": "MQTTNodesSubscription",
+        "topic": "SensorNetwork/Nodes",
+        "qos": "2",
+        "broker": "e81248ed.dbbe88",
+        "x": 130,
+        "y": 194,
+        "wires": [
+            [
+                "2df8df27.3ed34"
+            ]
+        ]
+    },
+    {
+        "id": "67f2b2f4.f7834c",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "9f29decb.064fd",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "BatteryN1",
+        "label": "Bateria: ",
+        "format": "{{value}}%",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "594f03d9.e4ac4c",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "Node1Humidity",
+        "func": "var data = JSON.parse(msg.payload);\n\nif(data.nodes != 1){\n    return null;\n}\n\nvar battery = {\"payload\":data.battery};\nvar size    = {\"payload\":data.measures.length};\n\nvar measures = [];\nvar i;\n\nfor(i = 0; i < data.measures.length; i++){\n    measures.push({\"payload\":data.measures[i], \"topic\":\"Sensor\"+data.nodes.toString()+(i+1).toString()});\n}\n\nreturn [battery, size, measures];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 600,
+        "y": 200,
+        "wires": [
+            [
+                "67f2b2f4.f7834c"
+            ],
+            [
+                "3b519116.7285ee"
+            ],
+            [
+                "46bafcdd.317214"
+            ]
+        ]
+    },
+    {
+        "id": "3b519116.7285ee",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "9f29decb.064fd",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "SizeN1",
+        "label": "Sensores conectados: ",
+        "format": "{{value}}",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "46bafcdd.317214",
+        "type": "ui_chart",
+        "z": "d15a13e8.c613c",
+        "name": "ChartN1",
+        "group": "9f29decb.064fd",
+        "order": 0,
+        "width": "6",
+        "height": "6",
+        "label": "Node#1 Humidity Sensors History",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Esperando datos...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 840,
+        "y": 280,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "98cd552a.747ff8",
+        "type": "delay",
+        "z": "8e837334.d37cd",
+        "name": "SHSampleRate",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "15",
+        "rateUnits": "minute",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "x": 300,
+        "y": 40,
+        "wires": [
+            [
+                "189b4282.01541d",
+                "8fd93f5b.d9e1",
+                "b9c466af.d724b8",
+                "3f283ba5.6ef324"
+            ]
+        ]
+    },
+    {
+        "id": "6f6e7c10.b11214",
+        "type": "file",
+        "z": "8e837334.d37cd",
+        "name": "SenseHatDataWriter",
+        "filename": "",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "false",
+        "x": 1280,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "4dae3ee2.c1947",
+        "type": "csv",
+        "z": "8e837334.d37cd",
+        "name": "SenseHatObjToCSV",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": true,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "x": 840,
+        "y": 280,
+        "wires": [
+            [
+                "9a660bde.a2c2e8"
+            ]
+        ]
+    },
+    {
+        "id": "62e4a352.9efa4c",
+        "type": "file",
+        "z": "d15a13e8.c613c",
+        "name": "NodesDataWriter1",
+        "filename": "",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "false",
+        "x": 1210,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "52229a42.80e4f4",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "TxtToJSON",
+        "func": "var data = JSON.parse(msg.payload);\nvar measures = data.measures;\n\nvar dt = new Date();\n\n//------Date------//\nvar year  = dt.getFullYear().toString();\nvar month = (dt.getMonth()+1).toString();\nvar day   = dt.getDate().toString();\n\nvar date = year+\"/\"+month+\"/\"+day;\n//----------------//\n\n//------Date------//\nvar hours   = dt.getHours().toString();\nvar minutes = (dt.getMinutes()+1).toString();\nvar seconds = dt.getSeconds().toString();\n\nvar hour = hours+\":\"+minutes+\":\"+seconds;\n//----------------//\n\n\nvar output = {\"date_stamp\":date, \"hour_stamp\": hour, \"node\":data.nodes.toString(), \"battery\":data.battery};\nvar i;\n\nfor(i = 0; i < measures.length; i++){\n    output[\"S\" + data.nodes.toString() + (i+1).toString()] = measures[i];\n}\n\nmsg.payload = output;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 590,
+        "y": 900,
+        "wires": [
+            [
+                "688b3ba7.e4d624"
+            ]
+        ]
+    },
+    {
+        "id": "688b3ba7.e4d624",
+        "type": "csv",
+        "z": "d15a13e8.c613c",
+        "name": "NodesObjToCSV",
+        "sep": ",",
+        "hdrin": false,
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "x": 790,
+        "y": 900,
+        "wires": [
+            [
+                "f068c8d9.5e29c8"
+            ]
+        ]
+    },
+    {
+        "id": "b7aefcef.fed52",
+        "type": "ui_text",
+        "z": "8e837334.d37cd",
+        "group": "915e93b3.a2e1d",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "name": "Date1",
+        "label": "Fecha actual: ",
+        "format": "{{msg.datestamp}}",
+        "layout": "row-spread",
+        "x": 1270,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "56dbb3e8.91a29c",
+        "type": "inject",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 810,
+        "y": 360,
+        "wires": [
+            [
+                "227b7e78.194e32"
+            ]
+        ]
+    },
+    {
+        "id": "beec72e6.c2d5",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "9606a88d.171dd8",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "BatteryN2",
+        "label": "Bateria: ",
+        "format": "{{value}}%",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "5c2fbf01.c4f33",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "Node2Humidity",
+        "func": "var data = JSON.parse(msg.payload);\n\nif(data.nodes != 2){\n    return null;\n}\n\nvar battery = {\"payload\":data.battery};\nvar size    = {\"payload\":data.measures.length};\n\nvar measures = [];\nvar i;\n\nfor(i = 0; i < data.measures.length; i++){\n    measures.push({\"payload\":data.measures[i], \"topic\":\"Sensor\"+data.nodes.toString()+(i+1).toString()});\n}\n\nreturn [battery, size, measures];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 600,
+        "y": 340,
+        "wires": [
+            [
+                "beec72e6.c2d5"
+            ],
+            [
+                "5ee3c881.b6e588"
+            ],
+            [
+                "bb5d5c85.6680b"
+            ]
+        ]
+    },
+    {
+        "id": "5ee3c881.b6e588",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "9606a88d.171dd8",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "SizeN2",
+        "label": "Sensores conectados: ",
+        "format": "{{value}}",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "bb5d5c85.6680b",
+        "type": "ui_chart",
+        "z": "d15a13e8.c613c",
+        "name": "ChartN2",
+        "group": "9606a88d.171dd8",
+        "order": 0,
+        "width": "6",
+        "height": "6",
+        "label": "Node#2 Humidity Sensors History",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Esperando datos...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 840,
+        "y": 420,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "f9c1a658.b91208",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "85f4ea52.2674d8",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "BatteryN3",
+        "label": "Bateria: ",
+        "format": "{{value}}%",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "130289b4.1a55b6",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "Node3Humidity",
+        "func": "var data = JSON.parse(msg.payload);\n\nif(data.nodes != 3){\n    return null;\n}\n\nvar battery = {\"payload\":data.battery};\nvar size    = {\"payload\":data.measures.length};\n\nvar measures = [];\nvar i;\n\nfor(i = 0; i < data.measures.length; i++){\n    measures.push({\"payload\":data.measures[i], \"topic\":\"Sensor\"+data.nodes.toString()+(i+1).toString()});\n}\n\nreturn [battery, size, measures];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 600,
+        "y": 480,
+        "wires": [
+            [
+                "f9c1a658.b91208"
+            ],
+            [
+                "98e496fb.cd5538"
+            ],
+            [
+                "bdd02df3.1ab01"
+            ]
+        ]
+    },
+    {
+        "id": "98e496fb.cd5538",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "85f4ea52.2674d8",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "SizeN3",
+        "label": "Sensores conectados:",
+        "format": "{{value}}",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "bdd02df3.1ab01",
+        "type": "ui_chart",
+        "z": "d15a13e8.c613c",
+        "name": "ChartN3",
+        "group": "85f4ea52.2674d8",
+        "order": 0,
+        "width": "6",
+        "height": "6",
+        "label": "Node#3 Humidity Sensors History",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Esperando datos...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 840,
+        "y": 560,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "be8e787d.824a18",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "5f9d59e2.d61998",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "BatteryN4",
+        "label": "Bateria: ",
+        "format": "{{value}}%",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "ba162895.aeb6c8",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "Node4Humidity",
+        "func": "var data = JSON.parse(msg.payload);\n\nif(data.nodes != 4){\n    return null;\n}\n\nvar battery = {\"payload\":data.battery};\nvar size    = {\"payload\":data.measures.length};\n\nvar measures = [];\nvar i;\n\nfor(i = 0; i < data.measures.length; i++){\n    measures.push({\"payload\":data.measures[i], \"topic\":\"Sensor\"+data.nodes.toString()+(i+1).toString()});\n}\n\nreturn [battery, size, measures];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 600,
+        "y": 620,
+        "wires": [
+            [
+                "be8e787d.824a18"
+            ],
+            [
+                "d5375555.2f15f8"
+            ],
+            [
+                "7e9cd6d8.088c88"
+            ]
+        ]
+    },
+    {
+        "id": "d5375555.2f15f8",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "5f9d59e2.d61998",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "SizeN4",
+        "label": "Sensores conectados: ",
+        "format": "{{value}}",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "7e9cd6d8.088c88",
+        "type": "ui_chart",
+        "z": "d15a13e8.c613c",
+        "name": "ChartN4",
+        "group": "5f9d59e2.d61998",
+        "order": 0,
+        "width": "6",
+        "height": "6",
+        "label": "Node#4 Humidity Sensors History",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Esperando datos...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 840,
+        "y": 700,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "7ddc544b.e1e71c",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "b35db334.fea44",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "BatteryN5",
+        "label": "Bateria: ",
+        "format": "{{value}}%",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "4849c1ec.0141a",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "Node5Humidity",
+        "func": "var data = JSON.parse(msg.payload);\n\nif(data.nodes != 5){\n    return null;\n}\n\nvar battery = {\"payload\":data.battery};\nvar size    = {\"payload\":data.measures.length};\n\nvar measures = [];\nvar i;\n\nfor(i = 0; i < data.measures.length; i++){\n    measures.push({\"payload\":data.measures[i], \"topic\":\"Sensor\"+data.nodes.toString()+(i+1).toString()});\n}\n\nreturn [battery, size, measures];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 600,
+        "y": 760,
+        "wires": [
+            [
+                "7ddc544b.e1e71c"
+            ],
+            [
+                "4703e103.9c519"
+            ],
+            [
+                "917ed0e1.0a103"
+            ]
+        ]
+    },
+    {
+        "id": "4703e103.9c519",
+        "type": "ui_text",
+        "z": "d15a13e8.c613c",
+        "group": "b35db334.fea44",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "SizeN5",
+        "label": "Sensores conectados: ",
+        "format": "{{value}}",
+        "layout": "row-spread",
+        "x": 840,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "917ed0e1.0a103",
+        "type": "ui_chart",
+        "z": "d15a13e8.c613c",
+        "name": "ChartN5",
+        "group": "b35db334.fea44",
+        "order": 0,
+        "width": "6",
+        "height": "6",
+        "label": "Node#5 Humidity Sensors History",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Esperando datos...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "1000",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 840,
+        "y": 840,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "227b7e78.194e32",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "DateAndTimeGenerator",
+        "func": "var dt = new Date();\n\n//------Date------//\nvar year  = dt.getFullYear().toString();\nvar month = (dt.getMonth()+1).toString();\nvar day   = dt.getDate().toString();\n\nvar date = year+\"/\"+month+\"/\"+day;\n//----------------//\n\n//------Date------//\nvar hours   = dt.getHours().toString();\nvar minutes = (dt.getMinutes()+1).toString();\nvar seconds = dt.getSeconds().toString();\n\nvar hour = hours+\":\"+minutes+\":\"+seconds;\n//----------------//\n\nmsg = {datestamp:date, hourstamp:hour};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1010,
+        "y": 360,
+        "wires": [
+            [
+                "b7aefcef.fed52",
+                "4b8ad84b.9417e8"
+            ]
+        ]
+    },
+    {
+        "id": "4b8ad84b.9417e8",
+        "type": "ui_text",
+        "z": "8e837334.d37cd",
+        "group": "915e93b3.a2e1d",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "Hour1",
+        "label": "Hora actual:",
+        "format": "{{msg.hourstamp}}",
+        "layout": "row-spread",
+        "x": 1270,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "d76024d8.a703b8",
+        "type": "ui_date_picker",
+        "z": "8e837334.d37cd",
+        "name": "DateSelector",
+        "label": "Nueva fecha:",
+        "group": "915e93b3.a2e1d",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "",
+        "x": 350,
+        "y": 500,
+        "wires": [
+            [
+                "eec9021b.3d6a6"
+            ]
+        ]
+    },
+    {
+        "id": "f068c8d9.5e29c8",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "NodesFileName",
+        "func": "var dt = new Date();\n\n//------Date------//\nvar year  = dt.getFullYear().toString();\nvar month = (dt.getMonth()+1).toString();\nvar day   = dt.getDate().toString();\n\nvar date = year + \"-\" + month + \"-\" + day;\n//----------------//\n\nmsg[\"filename\"] = \"/home/pi/Desktop/Data/Nodes/NodesData_\" + date + \".csv\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1000,
+        "y": 900,
+        "wires": [
+            [
+                "62e4a352.9efa4c"
+            ]
+        ]
+    },
+    {
+        "id": "9a660bde.a2c2e8",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "SenseHatFileName",
+        "func": "var dt = new Date();\n\n//------Date------//\nvar year  = dt.getFullYear().toString();\nvar month = (dt.getMonth()+1).toString();\nvar day   = dt.getDate().toString();\n\nvar date = year + \"-\" + month + \"-\" + day;\n//----------------//\n\nmsg[\"filename\"] = \"/home/pi/Desktop/Data/SenseHat/SenseHatData_\" + date + \".csv\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1070,
+        "y": 280,
+        "wires": [
+            [
+                "6f6e7c10.b11214"
+            ]
+        ]
+    },
+    {
+        "id": "c482c852.197cd8",
+        "type": "ui_template",
+        "z": "8e837334.d37cd",
+        "group": "c3b29894.471398",
+        "name": "DownloadNodes",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "format": "<!DOCTYPE html>\n<html>\n<head>\n<style>\n.button {\n    background-color: #097479; /* Green */\n    border: none;\n    color: white;\n    padding: 15px 32px;\n    text-align: center;\n    text-decoration: none;\n    display: inline-block;\n    font-size: 18px;\n    margin: 4px 2px;\n    cursor: pointer;\n    width: 100%;\n}\n\n</style>\n</head>\n<body>\n\n   <button class=\"button\" onclick=\"window.location.href='ftp://pi:raspberry@192.168.0.100/Nodes.zip'\">Download Nodes Data</button>\n\n</body>\n</html>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 120,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "90158ce.7ab4d7",
+        "type": "ui_button",
+        "z": "8e837334.d37cd",
+        "name": "Update",
+        "group": "915e93b3.a2e1d",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Update",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "x": 80,
+        "y": 760,
+        "wires": [
+            [
+                "f09ad82b.7cdb38",
+                "2d738ec7.c2f952",
+                "ebecf0c0.90db6",
+                "d1a3a827.35e7d8",
+                "d76024d8.a703b8"
+            ]
+        ]
+    },
+    {
+        "id": "f39752ff.259af",
+        "type": "ui_template",
+        "z": "8e837334.d37cd",
+        "group": "c3b29894.471398",
+        "name": "DownloadSenseHat",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "format": "<!DOCTYPE html>\n<html>\n<head>\n<style>\n.button {\n    background-color: #097479; /* Green */\n    border: none;\n    color: white;\n    padding: 15px 32px;\n    text-align: center;\n    text-decoration: none;\n    display: inline-block;\n    font-size: 18px;\n    margin: 4px 2px;\n    cursor: pointer;\n    width: 100%;\n}\n\n</style>\n</head>\n<body>\n\n   <button class=\"button\" onclick=\"window.location.href='ftp://pi:raspberry@192.168.0.100/SenseHat.zip'\">Download SenseHat Data</button>\n\n</body>\n</html>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 140,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c788821b.8a9f5",
+        "type": "exec",
+        "z": "d15a13e8.c613c",
+        "command": "zip -r /home/pi/Desktop/Data/Downloads/Nodes.zip /home/pi/Desktop/Data/Nodes",
+        "addpay": false,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "oldrc": false,
+        "name": "NodesZipMQTT",
+        "x": 600,
+        "y": 1080,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "af8a5d03.c26db",
+        "type": "exec",
+        "z": "d15a13e8.c613c",
+        "command": "zip -r /home/pi/Desktop/Data/Downloads/SenseHat.zip /home/pi/Desktop/Data/SenseHat",
+        "addpay": false,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "oldrc": false,
+        "name": "SenseHatZipMQTT",
+        "x": 610,
+        "y": 1000,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "eec9021b.3d6a6",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "EpochToStr",
+        "func": "var stringDate = new Date(msg.payload).toString();\nstringDate = stringDate.substring(0, 16);\n\nmsg.payload = stringDate;\nmsg.topic   = \"updatedDate\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 510,
+        "y": 500,
+        "wires": [
+            [
+                "c8580722.ce53c8"
+            ]
+        ]
+    },
+    {
+        "id": "d1a3a827.35e7d8",
+        "type": "ui_numeric",
+        "z": "8e837334.d37cd",
+        "name": "Hour",
+        "label": "Nueva hora:",
+        "group": "915e93b3.a2e1d",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "23",
+        "step": 1,
+        "x": 330,
+        "y": 560,
+        "wires": [
+            [
+                "3bc039e6.c44cc6"
+            ]
+        ]
+    },
+    {
+        "id": "ebecf0c0.90db6",
+        "type": "ui_numeric",
+        "z": "8e837334.d37cd",
+        "name": "Minute",
+        "label": "Nuevo minuto:",
+        "group": "915e93b3.a2e1d",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "59",
+        "step": 1,
+        "x": 330,
+        "y": 620,
+        "wires": [
+            [
+                "d99aba8d.705f98"
+            ]
+        ]
+    },
+    {
+        "id": "2d738ec7.c2f952",
+        "type": "ui_numeric",
+        "z": "8e837334.d37cd",
+        "name": "Second",
+        "label": "Nuevo segundo:",
+        "group": "915e93b3.a2e1d",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "59",
+        "step": 1,
+        "x": 340,
+        "y": 680,
+        "wires": [
+            [
+                "e2d55109.6bae4"
+            ]
+        ]
+    },
+    {
+        "id": "c8580722.ce53c8",
+        "type": "join",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "num",
+        "reduceFixup": "",
+        "x": 810,
+        "y": 760,
+        "wires": [
+            [
+                "141b1716.cae149",
+                "9179de83.34e9b",
+                "a842b79a.c51cf8",
+                "2e6a3ad6.38a076",
+                "248e8b40.f8da24"
+            ]
+        ]
+    },
+    {
+        "id": "f09ad82b.7cdb38",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "Ready",
+        "func": "msg.complete = true;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 330,
+        "y": 760,
+        "wires": [
+            [
+                "8a978406.d4b138"
+            ]
+        ]
+    },
+    {
+        "id": "3bc039e6.c44cc6",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "IntToStrHour",
+        "func": "var hour = msg.payload;\n\nmsg.payload = hour.toString();\nmsg.topic   = \"updatedHour\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 510,
+        "y": 560,
+        "wires": [
+            [
+                "c8580722.ce53c8"
+            ]
+        ]
+    },
+    {
+        "id": "d99aba8d.705f98",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "IntToStrMinute",
+        "func": "var minute = msg.payload;\n\nmsg.payload = minute.toString();\nmsg.topic   = \"updatedMinute\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 520,
+        "y": 620,
+        "wires": [
+            [
+                "c8580722.ce53c8"
+            ]
+        ]
+    },
+    {
+        "id": "e2d55109.6bae4",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "IntToStrSecond",
+        "func": "var second = msg.payload;\n\nmsg.payload = second.toString();\nmsg.topic   = \"updatedSecond\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 520,
+        "y": 680,
+        "wires": [
+            [
+                "c8580722.ce53c8"
+            ]
+        ]
+    },
+    {
+        "id": "8a978406.d4b138",
+        "type": "delay",
+        "z": "8e837334.d37cd",
+        "name": "SetDateAndHorDelay",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 540,
+        "y": 760,
+        "wires": [
+            [
+                "c8580722.ce53c8"
+            ]
+        ]
+    },
+    {
+        "id": "141b1716.cae149",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "finalDateAndHour",
+        "func": "var updatedDateAndHour = msg.payload.updatedDate + msg.payload.updatedHour + \":\" + msg.payload.updatedMinute + \":\" + msg.payload.updatedSecond + \" UTC\";\n\nmsg.payload = \"sudo date -s \\\"\" + updatedDateAndHour + \"\\\"\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1030,
+        "y": 760,
+        "wires": [
+            [
+                "aa03832e.31bbe"
+            ]
+        ]
+    },
+    {
+        "id": "aa03832e.31bbe",
+        "type": "exec",
+        "z": "8e837334.d37cd",
+        "command": "",
+        "addpay": true,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "oldrc": false,
+        "name": "SetNewDateAndHour",
+        "x": 1240,
+        "y": 760,
+        "wires": [
+            [
+                "c2216d82.c5432"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "9179de83.34e9b",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "UpdatedSecond",
+        "func": "var data = msg.updatedSecond;\n\nmsg.payload = parseInt(data);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1060,
+        "y": 680,
+        "wires": [
+            [
+                "25cd1b45.b024a4"
+            ]
+        ]
+    },
+    {
+        "id": "a842b79a.c51cf8",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "UpdatedMinute",
+        "func": "var data = msg.updatedMinute;\n\nmsg.payload = parseInt(data);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1060,
+        "y": 640,
+        "wires": [
+            [
+                "782444cf.88cc5c"
+            ]
+        ]
+    },
+    {
+        "id": "2e6a3ad6.38a076",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "UpdatedHour",
+        "func": "var data = msg.updatedHour;\n\nmsg.payload = parseInt(data);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1050,
+        "y": 600,
+        "wires": [
+            [
+                "46468538.fe5dfc"
+            ]
+        ]
+    },
+    {
+        "id": "248e8b40.f8da24",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "UpdatedDate",
+        "func": "var dt = new Date();\n\n//------Date------//\nvar year  = dt.getFullYear().toString();\nvar month = (dt.getMonth()+1).toString();\nvar day   = dt.getDate().toString();\n\nvar date = year + \"-\" + month + \"-\" + day;\n//----------------//\n\nmsg.payload = date;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1050,
+        "y": 560,
+        "wires": [
+            [
+                "3aaf83d1.31476c"
+            ]
+        ]
+    },
+    {
+        "id": "3aaf83d1.31476c",
+        "type": "link out",
+        "z": "8e837334.d37cd",
+        "name": "UDateOutput",
+        "links": [
+            "4562b8b.c54f548"
+        ],
+        "x": 1195,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "46468538.fe5dfc",
+        "type": "link out",
+        "z": "8e837334.d37cd",
+        "name": "UHourOutput",
+        "links": [
+            "d7edb755.085bd8"
+        ],
+        "x": 1195,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "4562b8b.c54f548",
+        "type": "link in",
+        "z": "8e837334.d37cd",
+        "name": "UDateInput",
+        "links": [
+            "3aaf83d1.31476c"
+        ],
+        "x": 155,
+        "y": 500,
+        "wires": [
+            [
+                "d76024d8.a703b8"
+            ]
+        ]
+    },
+    {
+        "id": "782444cf.88cc5c",
+        "type": "link out",
+        "z": "8e837334.d37cd",
+        "name": "UMinuteOutput",
+        "links": [
+            "7a8fcd9c.a3dc84"
+        ],
+        "x": 1195,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "25cd1b45.b024a4",
+        "type": "link out",
+        "z": "8e837334.d37cd",
+        "name": "USecondOutput",
+        "links": [
+            "7bf7ee42.b570c"
+        ],
+        "x": 1195,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "d7edb755.085bd8",
+        "type": "link in",
+        "z": "8e837334.d37cd",
+        "name": "UHourInput",
+        "links": [
+            "46468538.fe5dfc"
+        ],
+        "x": 155,
+        "y": 560,
+        "wires": [
+            [
+                "d1a3a827.35e7d8"
+            ]
+        ]
+    },
+    {
+        "id": "7a8fcd9c.a3dc84",
+        "type": "link in",
+        "z": "8e837334.d37cd",
+        "name": "UMinuteInput",
+        "links": [
+            "782444cf.88cc5c"
+        ],
+        "x": 155,
+        "y": 620,
+        "wires": [
+            [
+                "ebecf0c0.90db6"
+            ]
+        ]
+    },
+    {
+        "id": "7bf7ee42.b570c",
+        "type": "link in",
+        "z": "8e837334.d37cd",
+        "name": "USecondInput",
+        "links": [
+            "25cd1b45.b024a4"
+        ],
+        "x": 155,
+        "y": 680,
+        "wires": [
+            [
+                "2d738ec7.c2f952"
+            ]
+        ]
+    },
+    {
+        "id": "c2216d82.c5432",
+        "type": "debug",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 1430,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "634025a1.f9eeec",
+        "type": "inject",
+        "z": "d15a13e8.c613c",
+        "name": "SampleRateTime",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 1070,
+        "y": 760,
+        "wires": [
+            [
+                "d5941b9c.ee8758"
+            ]
+        ]
+    },
+    {
+        "id": "2da07ac9.ec9346",
+        "type": "mqtt out",
+        "z": "d15a13e8.c613c",
+        "name": "MQTTSamplingRatePublisher",
+        "topic": "SensorNetwork/SamplingRate",
+        "qos": "",
+        "retain": "",
+        "broker": "e81248ed.dbbe88",
+        "x": 1770,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "d5941b9c.ee8758",
+        "type": "file in",
+        "z": "d15a13e8.c613c",
+        "name": "SampleRateFile",
+        "filename": "/home/pi/Desktop/Data/SampleRate.txt",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "x": 1340,
+        "y": 760,
+        "wires": [
+            [
+                "89e2765c.ff9e18"
+            ]
+        ]
+    },
+    {
+        "id": "89e2765c.ff9e18",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "MinutesToSeconds",
+        "func": "var data = msg.payload;\n\nmsg.payload = parseInt(data)*60;\nmsg.payload = msg.payload.toString();\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1530,
+        "y": 760,
+        "wires": [
+            [
+                "2da07ac9.ec9346"
+            ]
+        ]
+    },
+    {
+        "id": "9f60640d.8dc218",
+        "type": "ui_numeric",
+        "z": "d15a13e8.c613c",
+        "name": "SampleRateSelector",
+        "label": "Nuevo tiempo de muestreo (minutos):",
+        "group": "262b709c.d84e9",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "samplerate",
+        "format": "{{value}}min",
+        "min": "1",
+        "max": "120",
+        "step": 1,
+        "x": 620,
+        "y": 1160,
+        "wires": [
+            [
+                "86d91b3.21c93e8"
+            ]
+        ]
+    },
+    {
+        "id": "ef80a0b8.75474",
+        "type": "ui_button",
+        "z": "d15a13e8.c613c",
+        "name": "ChangeSampleRate",
+        "group": "262b709c.d84e9",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Modificar periodo de muestreo",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "x": 340,
+        "y": 1240,
+        "wires": [
+            [
+                "3561c58.0b8773a",
+                "9f60640d.8dc218"
+            ]
+        ]
+    },
+    {
+        "id": "e57fb44c.7cfdc8",
+        "type": "join",
+        "z": "d15a13e8.c613c",
+        "name": "UpdateSampleRateDetector",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1040,
+        "y": 1240,
+        "wires": [
+            [
+                "58e93dad.3dcb34"
+            ]
+        ]
+    },
+    {
+        "id": "3561c58.0b8773a",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "Ready",
+        "func": "msg.complete = true;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 590,
+        "y": 1240,
+        "wires": [
+            [
+                "c47f92b7.7fea9"
+            ]
+        ]
+    },
+    {
+        "id": "86d91b3.21c93e8",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "IntToStr",
+        "func": "var data = msg.payload;\n\nmsg.payload = data.toString();\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 800,
+        "y": 1160,
+        "wires": [
+            [
+                "e57fb44c.7cfdc8"
+            ]
+        ]
+    },
+    {
+        "id": "be82b06.144fd5",
+        "type": "file",
+        "z": "d15a13e8.c613c",
+        "name": "SampleRateFileUpdater",
+        "filename": "/home/pi/Desktop/Data/SampleRate.txt",
+        "appendNewline": false,
+        "createDir": false,
+        "overwriteFile": "true",
+        "x": 1530,
+        "y": 1240,
+        "wires": []
+    },
+    {
+        "id": "c47f92b7.7fea9",
+        "type": "delay",
+        "z": "d15a13e8.c613c",
+        "name": "ReadyDelay",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 770,
+        "y": 1240,
+        "wires": [
+            [
+                "e57fb44c.7cfdc8"
+            ]
+        ]
+    },
+    {
+        "id": "58e93dad.3dcb34",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "SamplingRateSelector",
+        "func": "var data = msg.payload.samplerate;\n\nmsg.payload = data.toString();\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1280,
+        "y": 1240,
+        "wires": [
+            [
+                "be82b06.144fd5",
+                "6676fd5b.1cbb54"
+            ]
+        ]
+    },
+    {
+        "id": "6676fd5b.1cbb54",
+        "type": "function",
+        "z": "d15a13e8.c613c",
+        "name": "IntToStr",
+        "func": "var data = msg.payload;\n\nmsg.payload = parseInt(data);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1480,
+        "y": 1200,
+        "wires": [
+            [
+                "39af883c.ba5048"
+            ]
+        ]
+    },
+    {
+        "id": "84046bcb.724568",
+        "type": "link in",
+        "z": "d15a13e8.c613c",
+        "name": "USampleRateInput",
+        "links": [
+            "39af883c.ba5048"
+        ],
+        "x": 455,
+        "y": 1160,
+        "wires": [
+            [
+                "9f60640d.8dc218"
+            ]
+        ]
+    },
+    {
+        "id": "39af883c.ba5048",
+        "type": "link out",
+        "z": "d15a13e8.c613c",
+        "name": "USampleRateOutput",
+        "links": [
+            "84046bcb.724568"
+        ],
+        "x": 1575,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "2df8df27.3ed34",
+        "type": "switch",
+        "z": "d15a13e8.c613c",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "HELP!",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 310,
+        "y": 194,
+        "wires": [
+            [
+                "c2aa87e5.e839e8"
+            ],
+            [
+                "594f03d9.e4ac4c",
+                "5c2fbf01.c4f33",
+                "130289b4.1a55b6",
+                "ba162895.aeb6c8",
+                "4849c1ec.0141a",
+                "52229a42.80e4f4",
+                "af8a5d03.c26db",
+                "c788821b.8a9f5"
+            ]
+        ]
+    },
+    {
+        "id": "c2aa87e5.e839e8",
+        "type": "link out",
+        "z": "d15a13e8.c613c",
+        "name": "HelpInput",
+        "links": [
+            "c8a8bbc8.496f28"
+        ],
+        "x": 415,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "c8a8bbc8.496f28",
+        "type": "link in",
+        "z": "d15a13e8.c613c",
+        "name": "HelpOutput",
+        "links": [
+            "c2aa87e5.e839e8"
+        ],
+        "x": 1135,
+        "y": 720,
+        "wires": [
+            [
+                "d5941b9c.ee8758"
+            ]
+        ]
+    },
+    {
+        "id": "6f600674.d5f468",
+        "type": "inject",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 370,
+        "y": 340,
+        "wires": [
+            [
+                "f724903a.ccd22"
+            ]
+        ]
+    },
+    {
+        "id": "3f283ba5.6ef324",
+        "type": "function",
+        "z": "8e837334.d37cd",
+        "name": "SenseHatTimeStamp",
+        "func": "var dt = new Date();\nvar data = msg.payload;\n\n//------Date------//\nvar year  = dt.getFullYear().toString();\nvar month = (dt.getMonth()+1).toString();\nvar day   = dt.getDate().toString();\n\nvar date = year+\"/\"+month+\"/\"+day;\n//----------------//\n\n//------Date------//\nvar hours   = dt.getHours().toString();\nvar minutes = (dt.getMinutes()+1).toString();\nvar seconds = dt.getSeconds().toString();\n\nvar hour = hours+\":\"+minutes+\":\"+seconds;\n//----------------//\n\nvar output = {\"date_stamp\":date, \"hour_stamp\":hour, \"temperature\":data.temperature, \"humidity\":data.humidity, \"pressure\":data.pressure};\n\nmsg.payload = output;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 600,
+        "y": 280,
+        "wires": [
+            [
+                "4dae3ee2.c1947",
+                "db0f5f21.aa322"
+            ]
+        ]
+    },
+    {
+        "id": "db0f5f21.aa322",
+        "type": "debug",
+        "z": "8e837334.d37cd",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 790,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "f724903a.ccd22",
+        "type": "exec",
+        "z": "8e837334.d37cd",
+        "command": "/home/pi/Desktop/Data/updateDownloads.sh /home/pi/Desktop/Data/Downloads/Nodes.zip /home/pi/Desktop/Data/Downloads/SenseHat.zip",
+        "addpay": true,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "oldrc": false,
+        "name": "BASH",
+        "x": 550,
+        "y": 340,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    }
+]
