@@ -452,16 +452,12 @@ unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin){
   unsigned int batt = (unsigned int)(analogRead(adcChannel)*1.0337 + 203.42); //IRM Nonlinearity fixed
   pinMode(activationPin, INPUT); //IRM Stop sinking battery measurement current to save power
 
+  
+  //IRM battery measurement in 0% to 100% scale (see #defines for more details)
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
-
-<<<<<<< HEAD
   batt = map(batt, MIN_BAT_VOLTAGE, MAX_BAT_VOLTAGE, 0, 100); //IRM (3.7V -> 4.2V) = (0% -> 100%)
 
-=======
-  map(batt, 2296, 2605, 0, 100); //IRM (3.7V -> 4.2V) = (0% -> 100%)
->>>>>>> 2560c69812219ea112cd14702f6767079ab73f59
-
-  //IRM battery measurement in 0% to 100% scale (see #defines for more details)
+  
   return batt; 
   
 }
