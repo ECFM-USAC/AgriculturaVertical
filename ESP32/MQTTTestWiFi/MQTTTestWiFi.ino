@@ -33,7 +33,7 @@
 #include "soc/rtc_cntl_reg.h"
 
 
-//#define DEBUG 1  //IRM Enable/Disable as required
+#define DEBUG 1  //IRM Enable/Disable as required
 
 #define BUTTON KEY_BUILTIN
 
@@ -41,8 +41,8 @@
 #define ENABLE_SENSOR_MEASUREMENT_PIN 17 //IRM Sensors' VCC Enable Pin (so no power is wasted while not measuring)
 //IRM All the sensors' "VCC" must be connected to this pin. Max theoretical current with 6 sensors is 1mA
 
-#define ENABLE_BATTERY_MEASUREMENT_PIN 16
-#define BATTERY_ADC_PIN A11
+#define ENABLE_BATTERY_MEASUREMENT_PIN 2
+#define BATTERY_ADC_PIN A10
 
 /*
  * MAX VOLTAGE : 4.2 V = ADC 2606
@@ -125,7 +125,7 @@ bool writeNodeIDToEEPROM(byte id);
 void incrementNodeID(void);
 void initSensorValues(void);
 void sampleSensorValues(unsigned int *data);
-unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin);
+unsigned int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin, unsigned int highActivationPin);
 String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N);
 
 void setup_wifi() {
@@ -140,9 +140,9 @@ void setup_wifi() {
 
   int i = 0;
   while (WiFi.status() != WL_CONNECTED) {
-    delay(2000);
+    delay(1000);
     Serial.print(".");
-    if(++i>5){ //IRM Reboot if WiFi connection isn't established in 10 seconds (Software Watchdog)
+    if(++i>5){ //IRM Reboot if WiFi connection isn't established in 5 seconds (Software Watchdog)
       esp_sleep_enable_timer_wakeup(1);
       esp_deep_sleep_start();
     }
@@ -286,7 +286,7 @@ void loop() {
     sampleSensorValues(sensorValues, CONNECTED_SENSORS);
 
     //IRM Generate JSON String from data and battery values
-    unsigned int battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN);
+    unsigned int battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN, ENABLE_SENSOR_MEASUREMENT_PIN);
     json = toJSON(nodeID, battery, sensorValues, CONNECTED_SENSORS);
 
     //IRM Publish json string to broker
@@ -444,14 +444,25 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
 }
 
 //IRM return battery measurement within 100% to 0% range in unsigned integer format
-unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin){
+unsigned int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin, unsigned int highActivationPin){
 
   //IRM use a 1/2 voltage divider without exceeding 12 mA
-  pinMode(activationPin, OUTPUT);
-  digitalWrite(activationPin, 0); //IRM Sink battery measurement current
-  unsigned int batt = (unsigned int)(analogRead(adcChannel)*1.0337 + 203.42); //IRM Nonlinearity fixed
-  pinMode(activationPin, INPUT); //IRM Stop sinking battery measurement current to save power
+  pinMode(lowActivationPin, OUTPUT);
+  digitalWrite(lowActivationPin, 0); //IRM Sink battery measurement current
 
+  pinMode(highActivationPin, OUTPUT);
+  digitalWrite(highActivationPin, 1); //IRM Source battery measurement current
+
+  delay(1);
+  unsigned int batt = (unsigned int)(analogRead(adcChannel)*1.0337 + 203.42); //IRM Nonlinearity fixed
+  pinMode(lowActivationPin, INPUT); //IRM Stop sinking battery measurement current to save power
+  pinMode(highActivationPin, INPUT);
+  
+
+  if (DEBUG){
+    Serial.print("Batt ADC: ");
+    Serial.println(batt);
+  }
   
   //IRM battery measurement in 0% to 100% scale (see #defines for more details)
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
