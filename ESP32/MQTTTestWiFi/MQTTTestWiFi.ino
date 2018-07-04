@@ -60,6 +60,8 @@
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  10        /* Time ESP32 will go to sleep (in seconds) */
 
+#define WAKEUP_DELAY_FIX 3 //IRM Substract 3 seconds from sleep time to compensate for wake-up delay
+
 #define EEPROM_SIZE 64
 
 #define LED_BLINK_ON 25    //IRM LED On period between blink cycles
@@ -170,7 +172,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   const char * c = data;
   
   //IRM Parse text to integer
-  timeToSleep = atoi(c);
+  timeToSleep = atoi(c) - WAKEUP_DELAY_FIX;
 
   #ifdef DEBUG
   Serial.print("Time to sleep: ");
@@ -452,7 +454,7 @@ unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin){
 
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
 
-  map(batt, 0, 4095, 0, 100);
+  batt = map(batt, MIN_BAT_VOLTAGE, MAX_BAT_VOLTAGE, 0, 100);
 
   //IRM battery measurement in 0% to 100% scale (see #defines for more details)
   return batt; 
