@@ -46,15 +46,15 @@
 
 /*
  * MAX VOLTAGE : 4.2 V = ADC 2606
- * ALARM       : 3.7 V = ADC 2296
- * MIN VOLTAGE : 3.4 V = ADC 2110
+ * ALARM       : 3.8 V = ADC 2358
+ * MIN VOLTAGE : 3.7 V = ADC 2296
  * 
  * N = 12 bits 
  * VREF = 3.3 V
  */ 
 #define MAX_BAT_VOLTAGE 2606
-#define ALARM_BAT_VOLTAGE 2296
-#define MIN_BAT_VOLTAGE 2172
+#define ALARM_BAT_VOLTAGE 2358
+#define MIN_BAT_VOLTAGE 2296
 
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
@@ -454,7 +454,8 @@ unsigned int batteryLife(unsigned int adcChannel, unsigned int activationPin){
 
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
 
-  batt = map(batt, MIN_BAT_VOLTAGE, MAX_BAT_VOLTAGE, 0, 100);
+  batt = map(batt, MIN_BAT_VOLTAGE, MAX_BAT_VOLTAGE, 0, 100); //IRM (3.7V -> 4.2V) = (0% -> 100%)
+
 
   //IRM battery measurement in 0% to 100% scale (see #defines for more details)
   return batt; 
