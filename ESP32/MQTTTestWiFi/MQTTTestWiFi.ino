@@ -28,8 +28,8 @@
 #include "EEPROM.h"
 #include <ArduinoJson.h>
 #include <stdio.h>
-#include "driver/adc.h"
-#include "soc/soc.h"
+//#include "driver/adc.h"
+//#include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 
 
@@ -41,10 +41,12 @@
 #define ENABLE_SENSOR_MEASUREMENT_PIN 17 //IRM Sensors' VCC Enable Pin (so no power is wasted while not measuring)
 //IRM All the sensors' "VCC" must be connected to this pin. Max theoretical current with 6 sensors is 1mA
 
-#define ENABLE_BATTERY_MEASUREMENT_PIN 2
+#define ENABLE_BATTERY_MEASUREMENT_PIN 15
 #define BATTERY_ADC_PIN A10
 
 /*
+ * USING 1/2 V resistor divider
+ * 
  * MAX VOLTAGE : 4.2 V = ADC 2606
  * ALARM       : 3.8 V = ADC 2358
  * MIN VOLTAGE : 3.7 V = ADC 2296
@@ -98,8 +100,8 @@ const char* mqtt_server = "192.168.0.100";
 //const char* mqtt_server = "192.168.0.102";
 
 //IRM Analog pins where sensors may be plugged-in to. Sorted in ascendent order.
-const int8_t ANALOG_PINS[] = {A4, A5, A6, A7, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19};
-unsigned int sensorValues[MAX_NODES]; //IRM Sensor data will be stored here
+const int8_t ANALOG_PINS[] = {A4, A5, A18, A17, A16, A15, A14};
+unsigned int sensorValues[CONNECTED_SENSORS]; //IRM Sensor data will be stored here
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -115,7 +117,7 @@ int timeToSleep = TIME_TO_SLEEP;
 
 
 //IRM Custom function prototypes
-void setupVREF(void);
+//void setupVREF(void);
 void requestSamplingPeriod(void);
 void showNodeID(void);
 void setNodeID(void);
@@ -125,7 +127,7 @@ bool writeNodeIDToEEPROM(byte id);
 void incrementNodeID(void);
 void initSensorValues(void);
 void sampleSensorValues(unsigned int *data);
-unsigned int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin, unsigned int highActivationPin);
+unsigned int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin);
 String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N);
 
 void setup_wifi() {
@@ -222,9 +224,19 @@ void setup() {
   digitalWrite(LED_BUILTIN, 0);
   
   pinMode(ENABLE_SENSOR_MEASUREMENT_PIN, OUTPUT); //IRM Disable Sensors' Power Source
-  digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);
-
-  pinMode(ENABLE_BATTERY_MEASUREMENT_PIN, INPUT); //IRM Disable battery measurement sink
+  if(DEBUG){
+    digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 1);  
+  }else{
+    digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);
+  }
+  
+  if(DEBUG){
+    pinMode(ENABLE_BATTERY_MEASUREMENT_PIN, OUTPUT);  
+    digitalWrite(ENABLE_BATTERY_MEASUREMENT_PIN, 0);
+  }else{
+    pinMode(ENABLE_BATTERY_MEASUREMENT_PIN, INPUT); //IRM Disable battery measurement sink
+  }
+  
   
   Serial.begin(115200); 
 
@@ -286,7 +298,7 @@ void loop() {
     sampleSensorValues(sensorValues, CONNECTED_SENSORS);
 
     //IRM Generate JSON String from data and battery values
-    unsigned int battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN, ENABLE_SENSOR_MEASUREMENT_PIN);
+    unsigned int battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN);
     json = toJSON(nodeID, battery, sensorValues, CONNECTED_SENSORS);
 
     //IRM Publish json string to broker
@@ -297,6 +309,13 @@ void loop() {
 
   Serial.println("Waiting for server response");
   requestSamplingPeriod();
+
+  if(DEBUG){
+    Serial.println("10 seconds awake before going to sleep");
+    delay(10000);
+  }
+  
+  
   Serial.println("Going to deep-sleep now");
 
   esp_sleep_enable_timer_wakeup(timeToSleep * uS_TO_S_FACTOR);
@@ -421,7 +440,7 @@ bool buttonPressed(unsigned int tries){
 
 //IRM Clean Sensor Values Data Vector
 void initSensorValues(void){ 
-  for(int i = 0; i < MAX_NODES; i++){
+  for(int i = 0; i < CONNECTED_SENSORS; i++){
     sensorValues[i] = 0;
   }
 }
@@ -440,23 +459,32 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
   }
 
   //IRM Disable sensors' power supply
-  digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);
+  if(!DEBUG){
+    digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);  
+  }
+  
 }
 
+
+
+
+
 //IRM return battery measurement within 100% to 0% range in unsigned integer format
-unsigned int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin, unsigned int highActivationPin){
+unsigned int batteryLife(uint8_t adcPin, uint8_t lowActivationPin){
+
+  unsigned int batt;
 
   //IRM use a 1/2 voltage divider without exceeding 12 mA
   pinMode(lowActivationPin, OUTPUT);
-  digitalWrite(lowActivationPin, 0); //IRM Sink battery measurement current
+  digitalWrite(lowActivationPin, 0); //IRM Sink battery measurement current path
 
-  pinMode(highActivationPin, OUTPUT);
-  digitalWrite(highActivationPin, 1); //IRM Source battery measurement current
 
   delay(1);
-  unsigned int batt = (unsigned int)(analogRead(adcChannel)*1.0337 + 203.42); //IRM Nonlinearity fixed
-  pinMode(lowActivationPin, INPUT); //IRM Stop sinking battery measurement current to save power
-  pinMode(highActivationPin, INPUT);
+  
+  batt = (unsigned int)((analogRead(A10)*1.0337 + 203.42)); //IRM Nonlinearity fix
+  if(!DEBUG){
+    pinMode(lowActivationPin, INPUT); //IRM Stop sinking battery measurement current to save power
+  }
   
 
   if (DEBUG){
@@ -464,14 +492,13 @@ unsigned int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin,
     Serial.println(batt);
   }
   
-  //IRM battery measurement in 0% to 100% scale (see #defines for more details)
+  //IRM battery representation in a 0% to 100% scale (see #defines for more details)
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
   batt = map(batt, MIN_BAT_VOLTAGE, MAX_BAT_VOLTAGE, 0, 100); //IRM (3.7V -> 4.2V) = (0% -> 100%)
-
   
   return batt; 
-  
 }
+
 
 
 String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N){
@@ -500,7 +527,9 @@ String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8
 }
 
 //IRM Setup Internal 1000 mV VRef for Battery Measurment
-//IRM VRef routed to GPIO25 (A12)
+//IRM VRef routed to GPIO25 (A18)
+
+/*
 void setupVREF(void){
   pinMode(A12, INPUT);
   esp_err_t status = adc2_vref_to_gpio(GPIO_NUM_25);
@@ -514,4 +543,4 @@ void setupVREF(void){
     esp_deep_sleep_start();
   }
 }
-
+*/
