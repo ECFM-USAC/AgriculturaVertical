@@ -33,7 +33,8 @@
 #include "soc/rtc_cntl_reg.h"
 
 
-#define DEBUG 1  //IRM Enable/Disable as required
+//#define DEBUG  //IRM Enable/Disable as required
+
 
 #define BUTTON KEY_BUILTIN
 
@@ -74,8 +75,10 @@
 #define BUTTON_CHECK_TIMES 3 //IRM How many times the button must remain pressed to trigger a button-pressed event
 #define PRESSED_STATE 0 //IRM Inverted-logic
 
-#define NODE_ID_ADDR 0 //IRM Address where NodeID will be stored/retreived from
+#define NODE_ID_ADDR 0 //IRM EEPROM Address where NodeID will be stored/retreived from
 #define MAX_NODES 5
+
+#define RESTART_FLAG_ADDR 1 //IRM EEPROM Address where Restart Flag will be stored/retreived from
 
 #define SECONDS 1000 //IRM Milisenconds to Seconds conversion
 
@@ -102,6 +105,9 @@ const char* mqtt_server = "192.168.0.100";
 //IRM Analog pins where sensors may be plugged-in to. Sorted in ascendent order.
 const int8_t ANALOG_PINS[] = {A4, A5, A18, A17, A16, A15, A14};
 unsigned int sensorValues[CONNECTED_SENSORS]; //IRM Sensor data will be stored here
+int battery; //IRM Battery monitor voltage
+
+byte shouldIRestartMyself; //IRM Restart flag to fix ADC2<->WiFi compatibility
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -127,8 +133,10 @@ bool writeNodeIDToEEPROM(byte id);
 void incrementNodeID(void);
 void initSensorValues(void);
 void sampleSensorValues(unsigned int *data);
-unsigned int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin);
+int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin);
 String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N);
+byte getRestartFlag(byte eepromAddress);
+bool setRestartFlag(byte eepromAddress, byte flagValue);
 
 void setup_wifi() {
 
@@ -219,26 +227,41 @@ void reconnect() {
 }
 
 void setup() {
+
+  Serial.begin(115200);
+
+  if(getRestartFlag(RESTART_FLAG_ADDR) > 0){
+    setRestartFlag(RESTART_FLAG_ADDR, 0);
+    //ESP.restart();
+    digitalWrite(36, 0);
+    pinMode(36, OUTPUT);
+    digitalWrite(36, 0);
+  }else{
+    setRestartFlag(RESTART_FLAG_ADDR, 1); //IRM Restart after next boot 
+  }
+
+  WiFi.mode( WIFI_MODE_NULL );
+  
   pinMode(KEY_BUILTIN, INPUT_PULLUP); //Init dev-board integrated button. Inverted-logic
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   digitalWrite(LED_BUILTIN, 0);
   
   pinMode(ENABLE_SENSOR_MEASUREMENT_PIN, OUTPUT); //IRM Disable Sensors' Power Source
-  if(DEBUG){
+  #ifdef DEBUG
     digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 1);  
-  }else{
+  #else
     digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);
-  }
+  #endif
   
-  if(DEBUG){
+  #ifdef DEBUG
     pinMode(ENABLE_BATTERY_MEASUREMENT_PIN, OUTPUT);  
     digitalWrite(ENABLE_BATTERY_MEASUREMENT_PIN, 0);
-  }else{
+  #else
     pinMode(ENABLE_BATTERY_MEASUREMENT_PIN, INPUT); //IRM Disable battery measurement sink
-  }
+  #endif
   
   
-  Serial.begin(115200); 
+   
 
   digitalWrite(LED_BUILTIN, 1);
   delay(30);
@@ -258,8 +281,14 @@ void setup() {
   }
 
 
-  //IRM Disable Brownout Detector
+    //IRM Disable Brownout Detector
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+
+  //IRM Gather data from sensors and battery monitor
+  sampleSensorValues(sensorValues, CONNECTED_SENSORS);
+  battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN);
+
+  
   
   setup_wifi();
   //setupVREF(); //IRM Initialize Internal Voltage Reference
@@ -294,11 +323,9 @@ void loop() {
     client.publish(DATA_TOPIC_PUBLISH, msg);
     #endif
     
-    //IRM Gather data from sensors
-    sampleSensorValues(sensorValues, CONNECTED_SENSORS);
+
 
     //IRM Generate JSON String from data and battery values
-    unsigned int battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN);
     json = toJSON(nodeID, battery, sensorValues, CONNECTED_SENSORS);
 
     //IRM Publish json string to broker
@@ -310,9 +337,13 @@ void loop() {
   Serial.println("Waiting for server response");
   requestSamplingPeriod();
 
-  if(DEBUG){
+  #ifdef DEBUG
     Serial.println("10 seconds awake before going to sleep");
     delay(10000);
+  #endif
+
+  if (WiFi.isConnected()){
+    WiFi.disconnect(true);
   }
   
   
@@ -343,6 +374,35 @@ bool writeNodeIDToEEPROM(byte id){
     Serial.println("failed to initialise EEPROM"); return false;
   }
   EEPROM.write(NODE_ID_ADDR, id);
+  EEPROM.commit();
+  return true;
+}
+
+
+byte getRestartFlag(byte eepromAddress){
+
+  byte currentFlag;
+  
+  if (!EEPROM.begin(EEPROM_SIZE)){
+    Serial.println("failed to initialise EEPROM"); return false;
+  }
+  currentFlag = EEPROM.read(RESTART_FLAG_ADDR);
+
+  #ifdef DEBUG
+    Serial.print("Restart Flag Value: ");
+    Serial.println(currentFlag);
+    
+  #endif
+  
+  return currentFlag;
+}
+
+bool setRestartFlag(byte eepromAddress, byte flagValue){
+  if (!EEPROM.begin(EEPROM_SIZE)){
+    Serial.println("failed to initialise EEPROM"); return false;
+  }
+
+  EEPROM.write(eepromAddress, flagValue);
   EEPROM.commit();
   return true;
 }
@@ -459,9 +519,9 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
   }
 
   //IRM Disable sensors' power supply
-  if(!DEBUG){
+  #ifndef DEBUG
     digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);  
-  }
+  #endif
   
 }
 
@@ -470,7 +530,7 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
 
 
 //IRM return battery measurement within 100% to 0% range in unsigned integer format
-unsigned int batteryLife(uint8_t adcPin, uint8_t lowActivationPin){
+int batteryLife(uint8_t adcPin, uint8_t lowActivationPin){
 
   unsigned int batt;
 
@@ -478,23 +538,30 @@ unsigned int batteryLife(uint8_t adcPin, uint8_t lowActivationPin){
   pinMode(lowActivationPin, OUTPUT);
   digitalWrite(lowActivationPin, 0); //IRM Sink battery measurement current path
 
-
+  adcStart(adcPin);
+  adcAttachPin(adcPin);
+  
   delay(1);
   
-  batt = (unsigned int)((analogRead(A10)*1.0337 + 203.42)); //IRM Nonlinearity fix
-  if(!DEBUG){
+  batt = (unsigned int)((analogRead(adcPin)*1.0337 + 203.42)); //IRM Nonlinearity fix
+  #ifndef DEBUG
     pinMode(lowActivationPin, INPUT); //IRM Stop sinking battery measurement current to save power
-  }
+  #endif
   
 
-  if (DEBUG){
+  #ifdef DEBUG
     Serial.print("Batt ADC: ");
     Serial.println(batt);
-  }
+  #endif
   
   //IRM battery representation in a 0% to 100% scale (see #defines for more details)
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
   batt = map(batt, MIN_BAT_VOLTAGE, MAX_BAT_VOLTAGE, 0, 100); //IRM (3.7V -> 4.2V) = (0% -> 100%)
+
+  #ifdef DEBUG
+    Serial.print("Batt %: ");
+    Serial.println(batt);  
+  #endif
   
   return batt; 
 }
