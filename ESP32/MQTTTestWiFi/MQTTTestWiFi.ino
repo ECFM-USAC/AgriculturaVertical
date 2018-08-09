@@ -93,6 +93,8 @@
 
 #define CONNECTED_SENSORS 6
 
+
+
 // Update these with values suitable for your network.
 
 const char* ssid = "Agricultura-Vertical";
@@ -101,6 +103,15 @@ const char* mqtt_server = "192.168.0.100";
 
 
 //const char* mqtt_server = "192.168.0.102";
+
+
+// Analog Mux used for Analog Input PINS
+const uint8_t MUX_SEL_PINS [] = {14, 12, 13}; //S0, S1, S2
+const uint8_t SENSOR_PIN      = 32; // Analog Input Pin
+
+const uint8_t ANALOG_MUX   [] = {3, 0, 1, 2, 4, 6}; //Order of sampled pins
+
+
 
 //IRM Analog pins where sensors may be plugged-in to. Sorted in ascendent order.
 const int8_t ANALOG_PINS[] = {A4, A5, A18, A17, A16, A15, A14};
@@ -132,6 +143,7 @@ bool buttonPressed(unsigned int tries);
 bool writeNodeIDToEEPROM(byte id);
 void incrementNodeID(void);
 void initSensorValues(void);
+void setMuxChannel(unsigned int channel);
 void sampleSensorValues(unsigned int *data);
 int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin);
 String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N);
@@ -505,8 +517,68 @@ void initSensorValues(void){
   }
 }
 
+void setMuxChannel(unsigned int channel){
+
+  //const uint8_t ANALOG_MUX   [] = {3, 0, 1, 2, 4, 6}; //Order of sampled pins
+  //const uint8_t MUX_SEL_PINS [] = {14, 12, 13}; //S0, S1, S2
+  
+  uint8_t muxPins[3];
+  switch(channel){
+    case 0: //3
+      muxPins[0] = 1; muxPins[1] = 1; muxPins[2] = 0;
+      break;
+    case 1: //0
+      muxPins[0] = 0; muxPins[1] = 0; muxPins[2] = 0;
+      break;
+    case 2: //1
+      muxPins[0] = 1; muxPins[1] = 0; muxPins[2] = 0;
+      break;
+    case 3: //2
+      muxPins[0] = 0; muxPins[1] = 1; muxPins[2] = 0;
+      break;
+    case 4: //4
+      muxPins[0] = 1; muxPins[1] = 0; muxPins[2] = 1;
+      break;    
+    case 5: //6
+      muxPins[0] = 1; muxPins[1] = 1; muxPins[2] = 1;
+      break;
+    default:
+      muxPins[0] = 1; muxPins[1] = 1; muxPins[2] = 1;
+      break;
+  }
+  int i;
+  for(i = 0; i < 3; i++){
+    digitalWrite(MUX_SEL_PINS[i], muxPins[i]);
+  }
+}
+
 //IRM write sensor values into referenced data vector with N values
 void sampleSensorValues(unsigned int *data, uint8_t N){
+
+  /*
+   * ==================
+   * MUX Sensors Order
+   * ==================
+   * 
+   * 3, 0, 1, 2, 4, 5
+   */
+
+
+   /*
+   // Analog Mux used for Analog Input PINS
+    
+    const uint8_t SENSOR_PIN      = 32; // Analog Input Pin
+    
+    */
+
+  // During Setup(): Set corresponding pin directions for MUX_Si pins
+  // Disable MUX Inhibit
+  // for(0,5)
+    // Set channel control pin (Select) in Mux
+    // Read analog pin
+  // end for
+  // Enable MUX Inhibit
+
 
   //IRM Enable sensors' power supply
   digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 1);
