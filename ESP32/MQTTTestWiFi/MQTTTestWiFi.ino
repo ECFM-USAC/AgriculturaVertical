@@ -43,7 +43,7 @@
 //IRM All the sensors' "VCC" must be connected to this pin. Max theoretical current with 6 sensors is 1mA
 
 #define ENABLE_BATTERY_MEASUREMENT_PIN 15
-#define BATTERY_ADC_PIN A10
+#define BATTERY_ADC_PIN 33
 
 /*
  * USING 1/2 V resistor divider
@@ -55,6 +55,7 @@
  * N = 12 bits 
  * VREF = 3.3 V
  */ 
+
 #define MAX_BAT_VOLTAGE 2606
 #define ALARM_BAT_VOLTAGE 2358
 #define MIN_BAT_VOLTAGE 2296
@@ -110,6 +111,7 @@ const uint8_t MUX_SEL_PINS [] = {14, 12, 13}; //S0, S1, S2
 const uint8_t SENSOR_PIN      = 32; // Analog Input Pin
 
 const uint8_t ANALOG_MUX   [] = {3, 0, 1, 2, 4, 6}; //Order of sampled pins
+const uint8_t MUX_INHIBIT_PIN = 25;
 
 
 
@@ -259,10 +261,13 @@ void setup() {
   digitalWrite(LED_BUILTIN, 0);
   
   pinMode(ENABLE_SENSOR_MEASUREMENT_PIN, OUTPUT); //IRM Disable Sensors' Power Source
+  pinMode(MUX_INHIBIT_PIN, OUTPUT); //IRM Enable MUX's Inhibit function
   #ifdef DEBUG
-    digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 1);  
+    digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 1);
+    digitalWrite(MUX_INHIBIT_PIN, 0);  
   #else
     digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);
+    digitalWrite(MUX_INHIBIT_PIN, 1);
   #endif
   
   #ifdef DEBUG
@@ -517,10 +522,8 @@ void initSensorValues(void){
   }
 }
 
+//IRM Select MUX Analog Channel according to PCB pinout
 void setMuxChannel(unsigned int channel){
-
-  //const uint8_t ANALOG_MUX   [] = {3, 0, 1, 2, 4, 6}; //Order of sampled pins
-  //const uint8_t MUX_SEL_PINS [] = {14, 12, 13}; //S0, S1, S2
   
   uint8_t muxPins[3];
   switch(channel){
@@ -537,10 +540,10 @@ void setMuxChannel(unsigned int channel){
       muxPins[0] = 0; muxPins[1] = 1; muxPins[2] = 0;
       break;
     case 4: //4
-      muxPins[0] = 1; muxPins[1] = 0; muxPins[2] = 1;
+      muxPins[0] = 0; muxPins[1] = 0; muxPins[2] = 1;
       break;    
     case 5: //6
-      muxPins[0] = 1; muxPins[1] = 1; muxPins[2] = 1;
+      muxPins[0] = 0; muxPins[1] = 1; muxPins[2] = 1;
       break;
     default:
       muxPins[0] = 1; muxPins[1] = 1; muxPins[2] = 1;
@@ -571,7 +574,7 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
     
     */
 
-  // During Setup(): Set corresponding pin directions for MUX_Si pins
+  // During Setup(): Set corresponding pin directions for MUX_Si pins and Enable MUX Inhibit
   // Disable MUX Inhibit
   // for(0,5)
     // Set channel control pin (Select) in Mux
@@ -582,17 +585,26 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
 
   //IRM Enable sensors' power supply
   digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 1);
+  
+  //IRM Disable MUX's Inhibit to enable analog channel
+  digitalWrite(MUX_INHIBIT_PIN, 0);
 
   
   for(int i = 0; i < N; i++){
+
+    setMuxChannel(i); // IRM Set Analog Mux Input Channel
+    
     //IRM Fixed nonlinearity in ESP32 ADC mearurements
     //IRM Coefficients obtained through experimentation with a calibrated power supply
-    data[i] = (unsigned int)(analogRead(ANALOG_PINS[i])*1.0337 + 203.42);
+    //data[i] = (unsigned int)(analogRead(ANALOG_PINS[i])*1.0337 + 203.42);
+    data[i] = (unsigned int)(analogRead(SENSOR_PIN)*1.0337 + 203.42));    
+    
   }
 
   //IRM Disable sensors' power supply
   #ifndef DEBUG
     digitalWrite(ENABLE_SENSOR_MEASUREMENT_PIN, 0);  
+    digitalWrite(MUX_INHIBIT_PIN, 1);
   #endif
   
 }
