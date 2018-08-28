@@ -48,7 +48,7 @@
 /*
  * USING 1/2 V resistor divider
  * 
- * MAX VOLTAGE : 4.2 V = ADC 2606
+ * MAX VOLTAGE : 4.1 V = ADC 2547
  * ALARM       : 3.8 V = ADC 2358
  * MIN VOLTAGE : 3.7 V = ADC 2296
  * 
@@ -56,7 +56,7 @@
  * VREF = 3.3 V
  */ 
 
-#define MAX_BAT_VOLTAGE 2606
+#define MAX_BAT_VOLTAGE 2547
 #define ALARM_BAT_VOLTAGE 2358
 #define MIN_BAT_VOLTAGE 2296
 
@@ -64,7 +64,7 @@
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  10        /* Time ESP32 will go to sleep (in seconds) */
 
-#define WAKEUP_DELAY_FIX 3 //IRM Substract 3 seconds from sleep time to compensate for wake-up delay
+#define WAKEUP_DELAY_FIX 2 //IRM Substract 2 seconds from sleep time to compensate for wake-up delay
 
 #define EEPROM_SIZE 64
 
@@ -147,7 +147,7 @@ void incrementNodeID(void);
 void initSensorValues(void);
 void setMuxChannel(unsigned int channel);
 void sampleSensorValues(unsigned int *data);
-int batteryLife(unsigned int adcChannel, unsigned int lowActivationPin);
+int batteryLife(uint8_t adcChannel, uint8_t lowActivationPin);
 String toJSON(unsigned int node, unsigned int battery, unsigned int *data, uint8_t N);
 byte getRestartFlag(byte eepromAddress);
 bool setRestartFlag(byte eepromAddress, byte flagValue);
@@ -166,7 +166,7 @@ void setup_wifi() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
-    if(++i>5){ //IRM Reboot if WiFi connection isn't established in 5 seconds (Software Watchdog)
+    if(++i>4){ //IRM Reboot if WiFi connection isn't established in 4 seconds (Software Watchdog)
       esp_sleep_enable_timer_wakeup(1);
       esp_deep_sleep_start();
     }
@@ -259,6 +259,10 @@ void setup() {
   pinMode(KEY_BUILTIN, INPUT_PULLUP); //Init dev-board integrated button. Inverted-logic
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   digitalWrite(LED_BUILTIN, 0);
+
+  pinMode(MUX_SEL_PINS[0], OUTPUT);
+  pinMode(MUX_SEL_PINS[1], OUTPUT);
+  pinMode(MUX_SEL_PINS[2], OUTPUT);
   
   pinMode(ENABLE_SENSOR_MEASUREMENT_PIN, OUTPUT); //IRM Disable Sensors' Power Source
   pinMode(MUX_INHIBIT_PIN, OUTPUT); //IRM Enable MUX's Inhibit function
@@ -301,6 +305,8 @@ void setup() {
     //IRM Disable Brownout Detector
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
 
+  initSensorValues();
+
   //IRM Gather data from sensors and battery monitor
   sampleSensorValues(sensorValues, CONNECTED_SENSORS);
   battery = batteryLife(BATTERY_ADC_PIN, ENABLE_BATTERY_MEASUREMENT_PIN);
@@ -316,7 +322,7 @@ void setup() {
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 
-  initSensorValues();
+  
 }
 
 void loop() {
@@ -593,11 +599,20 @@ void sampleSensorValues(unsigned int *data, uint8_t N){
   for(int i = 0; i < N; i++){
 
     setMuxChannel(i); // IRM Set Analog Mux Input Channel
+    delayMicroseconds(100);
     
     //IRM Fixed nonlinearity in ESP32 ADC mearurements
     //IRM Coefficients obtained through experimentation with a calibrated power supply
     //data[i] = (unsigned int)(analogRead(ANALOG_PINS[i])*1.0337 + 203.42);
-    data[i] = (unsigned int)(analogRead(SENSOR_PIN)*1.0337 + 203.42));    
+    data[i] = (unsigned int)(analogRead(SENSOR_PIN)*1.0337 + 203.42);    
+    
+    /*
+    Serial.print("ADC ");
+    Serial.print(i);
+    Serial.print(" : ");
+    Serial.println(data[i]);
+    */
+    delayMicroseconds(100);
     
   }
 
@@ -625,13 +640,12 @@ int batteryLife(uint8_t adcPin, uint8_t lowActivationPin){
   adcStart(adcPin);
   adcAttachPin(adcPin);
   
-  delay(1);
+  delayMicroseconds(20);
   
   batt = (unsigned int)((analogRead(adcPin)*1.0337 + 203.42)); //IRM Nonlinearity fix
   #ifndef DEBUG
     pinMode(lowActivationPin, INPUT); //IRM Stop sinking battery measurement current to save power
   #endif
-  
 
   #ifdef DEBUG
     Serial.print("Batt ADC: ");
