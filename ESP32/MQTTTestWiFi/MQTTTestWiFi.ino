@@ -166,7 +166,7 @@ void setup_wifi() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
-    if(++i>4){ //IRM Reboot if WiFi connection isn't established in 4 seconds (Software Watchdog)
+    if(++i>5){ //IRM Reboot if WiFi connection isn't established within 5 seconds (Software Watchdog)
       esp_sleep_enable_timer_wakeup(1);
       esp_deep_sleep_start();
     }
