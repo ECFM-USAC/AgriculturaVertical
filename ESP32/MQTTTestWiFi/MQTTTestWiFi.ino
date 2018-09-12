@@ -48,7 +48,7 @@
 /*
  * USING 1/2 V resistor divider
  * 
- * MAX VOLTAGE : 4.1 V = ADC 2547
+ * MAX VOLTAGE : 4.2 V = ADC 2580
  * ALARM       : 3.8 V = ADC 2358
  * MIN VOLTAGE : 3.7 V = ADC 2296
  * 
@@ -56,7 +56,7 @@
  * VREF = 3.3 V
  */ 
 
-#define MAX_BAT_VOLTAGE 2547
+#define MAX_BAT_VOLTAGE 2580
 #define ALARM_BAT_VOLTAGE 2358
 #define MIN_BAT_VOLTAGE 2296
 
@@ -647,10 +647,10 @@ int batteryLife(uint8_t adcPin, uint8_t lowActivationPin){
     pinMode(lowActivationPin, INPUT); //IRM Stop sinking battery measurement current to save power
   #endif
 
-  #ifdef DEBUG
+  //#ifdef DEBUG
     Serial.print("Batt ADC: ");
     Serial.println(batt);
-  #endif
+  //#endif
   
   //IRM battery representation in a 0% to 100% scale (see #defines for more details)
   batt = batt>MAX_BAT_VOLTAGE?MAX_BAT_VOLTAGE:batt; //IRM Limit battery voltage to a theoretical 100%
